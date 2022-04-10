@@ -1,6 +1,8 @@
 /* Linear Table On Sequence Structure */
 #include <cstdio>
 #include <malloc.h>
+#include <cstring>
+
 using namespace std;
 #define TRUE 1
 #define FALSE 0
@@ -12,6 +14,13 @@ using namespace std;
 typedef int status;
 typedef int ElemType; //数据元素类型定义
 
+
+typedef struct Node {
+    int key;
+    int value;
+    struct Node *next;
+} HashNode;
+
 #define LIST_INIT_SIZE 100
 #define LISTINCREMENT  10
 typedef struct {  //顺序表（顺序结构）的定义
@@ -19,6 +28,15 @@ typedef struct {  //顺序表（顺序结构）的定义
     int length;
     int listSize;
 } SqList;
+typedef struct {  //线性表的集合类型定义
+    struct {
+        char name[30];
+        SqList L;
+    } elem[10];
+    int length;
+} LISTS;
+LISTS Lists;      //线性表集合的定义Lists
+int usingList = 0;
 
 /*
  * Function:        InitList
@@ -200,19 +218,46 @@ status SaveList(SqList L, char FileName[]);
  */
 status LoadList(SqList &L, char FileName[]);
 
+int MaxSubArray(SqList L);
+
+int SubArrayNum(SqList L, ElemType k);
+
+status sortList(SqList L);
+
+ElemType min(ElemType a, ElemType b);
+
+ElemType max(ElemType a, ElemType b);
+
+int hash(int key, int numsSize);
+
+int containKey(HashNode *hashtable, int key, int numsSize);
+
+int getKey(HashNode *hashtable, int key, int numsSize);
+
+void push(HashNode *hashtable, int key, int numsSize);
+
+status AddList(LISTS &lists, const char ListName[]);
+
+status RemoveList(LISTS &lists, char ListName[]);
+
+int LocateList(LISTS lists, const char ListName[]);
+
 /*--------------------------------------------*/
 int main() {
-    SqList L;
     int op = 1, tmp;
     ElemType e;
-    char filename[128];
-    L.elem = nullptr;
+    char filename[128], s[30];
+    for (auto &i: Lists.elem) {
+        i.L.elem = nullptr;
+    }
+    Lists.length = 1;
+    strcpy(Lists.elem[usingList].name, "Default");
     while (op) {
         system("cls");
         printf("\n\n");
         // ╔ ═ ╗ ║ ╚ ╝
         printf("    ╔════════════════════════════════════════════════╗\n");
-        printf("    ║  Menu for Linear Table On Sequence Structure   ║\n");
+        printf("    ║               %d-%-10s                     ║\n", usingList, Lists.elem[usingList].name);
         printf("    ╟────────────────────────────────────────────────╢\n");
         printf("    ║     1. InitList           2. DestroyList       ║\n");
         printf("    ║     3. ClearList          4. ListEmpty         ║\n");
@@ -221,13 +266,16 @@ int main() {
         printf("    ║     9. NextElem           10. ListInsert       ║\n");
         printf("    ║     11. ListDelete        12. ListTraverse     ║\n");
         printf("    ║     13. SaveList          14. LoadList         ║\n");
+        printf("    ║     15. MaxSubArray       16. SubArrayNum      ║\n");
+        printf("    ║     17. sortList          18. RemoveList       ║\n");
+        printf("    ║     19. ChangeList        20. AddList          ║\n");
         printf("    ║                  0. Exit                       ║\n");
         printf("    ╚════════════════════════════════════════════════╝\n");
-        printf("    请选择你的操作[0~12]:");
+        printf("    请选择你的操作[0~20]:");
         scanf_s("%d", &op);
         switch (op) {
             case 1:
-                switch (InitList(L)) {
+                switch (InitList(Lists.elem[usingList].L)) {
                     case OK:
                         printf("线性表创建成功！\n");
                         break;
@@ -243,7 +291,7 @@ int main() {
                 break;
             case 2:
                 // printf("\n----DestroyList功能待实现！\n");
-                switch (DestroyList(L)) {
+                switch (DestroyList(Lists.elem[usingList].L)) {
                     case OK:
                         printf("线性表销毁成功！\n");
                         break;
@@ -256,7 +304,7 @@ int main() {
                 break;
             case 3:
                 // printf("\n----ClearList功能待实现！\n");
-                switch (ClearList(L)) {
+                switch (ClearList(Lists.elem[usingList].L)) {
                     case OK:
                         printf("线性表清空成功！\n");
                         break;
@@ -269,7 +317,7 @@ int main() {
                 break;
             case 4:
                 // printf("\n----ListEmpty功能待实现！\n");
-                switch (ListEmpty(L)) {
+                switch (ListEmpty(Lists.elem[usingList].L)) {
                     case TRUE:
                         printf("线性表为空。\n");
                         break;
@@ -285,7 +333,7 @@ int main() {
                 break;
             case 5:
                 // printf("\n----ListLength功能待实现！\n");
-                if ((tmp = ListLength(L)) == INFEASIBLE)
+                if ((tmp = ListLength(Lists.elem[usingList].L)) == INFEASIBLE)
                     printf("线性表未初始化！\n");
                 else
                     printf("线性表长度为 %d。", tmp);
@@ -296,7 +344,7 @@ int main() {
                 // printf("\n----GetElem功能待实现！\n");
                 printf("请输入元素位置:\n");
                 scanf_s("%d", &tmp);
-                switch (GetElem(L, tmp, e)) {
+                switch (GetElem(Lists.elem[usingList].L, tmp, e)) {
                     case OK:
                         printf("第%d个元素为%d。\n", tmp, e);
                         break;
@@ -314,7 +362,7 @@ int main() {
                 // printf("\n----LocateElem功能待实现！\n");
                 printf("请输入元素值:\n");
                 scanf_s("%d", &e);
-                switch (tmp = LocateElem(L, e)) {
+                switch (tmp = LocateElem(Lists.elem[usingList].L, e)) {
                     case ERROR:
                         printf("元素%d不存在！\n", e);
                         break;
@@ -332,7 +380,7 @@ int main() {
                 // printf("\n----PriorElem功能待实现！\n");
                 printf("请输入当前元素值:\n");
                 scanf_s("%d", &e);
-                switch (PriorElem(L, e, e)) {
+                switch (PriorElem(Lists.elem[usingList].L, e, e)) {
                     case OK:
                         printf("前驱元素为%d。\n", e);
                         break;
@@ -350,7 +398,7 @@ int main() {
                 // printf("\n----NextElem功能待实现！\n");
                 printf("请输入当前元素值:\n");
                 scanf_s("%d", &e);
-                switch (NextElem(L, e, e)) {
+                switch (NextElem(Lists.elem[usingList].L, e, e)) {
                     case OK:
                         printf("后继元素为%d。\n", e);
                         break;
@@ -370,7 +418,7 @@ int main() {
                 scanf_s("%d", &tmp);
                 printf("请输入元素值:\n");
                 scanf_s("%d", &e);
-                switch (ListInsert(L, tmp, e)) {
+                switch (ListInsert(Lists.elem[usingList].L, tmp, e)) {
                     case OK:
                         printf("元素%d插入成功！\n", e);
                         break;
@@ -391,7 +439,7 @@ int main() {
                 // printf("\n----ListDelete功能待实现！\n");
                 printf("请输入位置值:\n");
                 scanf_s("%d", &tmp);
-                switch (ListDelete(L, tmp, e)) {
+                switch (ListDelete(Lists.elem[usingList].L, tmp, e)) {
                     case OK:
                         printf("第%d个元素%d删除成功！\n", tmp, e);
                         break;
@@ -407,7 +455,7 @@ int main() {
                 break;
             case 12:
 
-                if (ListTraverse(L) == INFEASIBLE) {
+                if (ListTraverse(Lists.elem[usingList].L) == INFEASIBLE) {
                     printf("线性表未初始化！\n");
                 }
                 getchar();
@@ -416,7 +464,7 @@ int main() {
             case 13:
                 printf("请输入文件路径:\n");
                 scanf("%s", filename);
-                switch (SaveList(L, filename)) {
+                switch (SaveList(Lists.elem[usingList].L, filename)) {
                     case ERROR:
                         printf("文件打开失败！\n");
                         break;
@@ -433,7 +481,7 @@ int main() {
             case 14:
                 printf("请输入文件路径:\n");
                 scanf("%s", filename);
-                switch (LoadList(L, filename)) {
+                switch (LoadList(Lists.elem[usingList].L, filename)) {
                     case ERROR:
                         printf("文件打开失败！\n");
                         break;
@@ -445,6 +493,67 @@ int main() {
                         break;
                     case OK:
                         printf("加载成功！\n");
+                        break;
+                }
+                getchar();
+                getchar();
+                break;
+            case 15:
+                tmp = MaxSubArray(Lists.elem[usingList].L);
+                printf("最大子数组和为%d。\n", tmp);
+                getchar();
+                getchar();
+                break;
+            case 16:
+                printf("请输入子数组和:\n");
+                scanf_s("%d", &e);
+                tmp = SubArrayNum(Lists.elem[usingList].L, e);
+                printf("和为%d的子数组数为%d。\n", e, tmp);
+                getchar();
+                getchar();
+                break;
+            case 17:
+                if (sortList(Lists.elem[usingList].L) == OK) {
+                    printf("排序成功！\n");
+                } else {
+                    printf("排序失败！\n");
+                }
+                getchar();
+                getchar();
+                break;
+            case 18:
+                printf("请输入要删除的表名:\n");
+                scanf_s("%s", s);
+                if (RemoveList(Lists, s) == ERROR)printf("删除失败！\n");
+                else printf("删除成功！\n");
+                getchar();
+                getchar();
+                break;
+            case 19:
+                printf("请输入要使用的表名:\n");
+                scanf_s("%s", s);
+                tmp = LocateList(Lists, s);
+                if (tmp) {
+                    usingList = tmp - 1;
+                    printf("改变使用表成功！\n当前表:%d-%s\n", usingList, Lists.elem[usingList].name);
+                } else {
+                    printf("表不存在！\n");
+                }
+                getchar();
+                getchar();
+                break;
+            case 20:
+                printf("请输入要创建的表名:\n");
+                scanf_s("%s", s);
+                switch (AddList(Lists, s)) {
+                    case OK:
+                        printf("创建成功！\n");
+                        break;
+                    case OVERFLOW:
+                        printf("当前表过多！\n");
+                        break;
+                    case ERROR:
+                        printf("表已存在！\n");
                         break;
                 }
                 getchar();
@@ -607,4 +716,154 @@ status LoadList(SqList &L, char FileName[]) {
         fclose(pRead);
         return s;
     } else return ERROR;
+}
+
+int MaxSubArray(SqList L) {
+    if (!L.elem)return INFEASIBLE;
+    int pre = 0, maxAns = L.elem[0];
+    for (int i = 0; i < L.length; i++) {
+        pre = max(pre + L.elem[i], L.elem[i]);
+        maxAns = max(maxAns, pre);
+    }
+    return maxAns;
+}
+
+status sortList(SqList L) {
+    ElemType *a = L.elem;
+    auto *b = (ElemType *) malloc(L.length * sizeof(ElemType));
+    if (!b)return ERROR;
+    int seg, start;
+    for (seg = 1; seg < L.length; seg += seg) {
+        for (start = 0; start < L.length; start += seg * 2) {
+            int low = start, mid = min(start + seg, L.length), high = min(start + seg * 2, L.length);
+            int k = low;
+            int start1 = low, end1 = mid;
+            int start2 = mid, end2 = high;
+            while (start1 < end1 && start2 < end2)
+                b[k++] = a[start1] > a[start2] ? a[start1++] : a[start2++];
+            while (start1 < end1)
+                b[k++] = a[start1++];
+            while (start2 < end2)
+                b[k++] = a[start2++];
+        }
+        int *temp = a;
+        a = b;
+        b = temp;
+    }
+    if (a != L.elem) {
+        int i;
+        for (i = 0; i < L.length; i++)
+            b[i] = a[i];
+        b = a;
+    }
+    free(b);
+    return OK;
+}
+
+ElemType min(ElemType a, ElemType b) {
+    return a > b ? b : a;
+}
+
+ElemType max(ElemType a, ElemType b) {
+    return a < b ? b : a;
+}
+
+
+int hash(int key, int numsSize) {
+    return key & (numsSize - 1);
+}
+
+int containKey(HashNode *hashtable, int key, int numsSize) {
+    HashNode *head = &hashtable[hash(key, numsSize)];
+    HashNode *tail = head->next;
+    while (tail) {
+        if (tail->key == key) return 1;
+        tail = tail->next;
+    }
+    return 0;
+}
+
+int getKey(HashNode *hashtable, int key, int numsSize) {
+    HashNode *head = &hashtable[hash(key, numsSize)];
+    HashNode *tail = head->next;
+    while (tail) {
+        if (tail->key == key) return tail->value;
+        tail = tail->next;
+    }
+    return -1;
+}
+
+void push(HashNode *hashtable, int key, int numsSize) {
+    HashNode *head = &hashtable[hash(key, numsSize)];
+    HashNode *tail = head->next;
+    while (tail) {
+        if (tail->key == key) {
+            tail->value++;
+            return;
+        }
+        tail = tail->next;
+    }
+    auto *q = (HashNode *) malloc(sizeof(HashNode));
+    q->key = key;
+    q->value = 1;
+    q->next = head->next;
+    head->next = q;
+}
+
+int SubArrayNum(SqList L, int k) {
+    auto *hashtable = (HashNode *) malloc(sizeof(HashNode) * L.length);
+    memset(hashtable, 0, sizeof(HashNode) * L.length);
+    push(hashtable, 0, L.length);
+    int pre = 0, cnt = 0;
+    for (int i = 0; i < L.length; i++) {
+        pre += L.elem[i];
+        if (containKey(hashtable, pre - k, L.length))
+            cnt += getKey(hashtable, pre - k, L.length);
+        push(hashtable, pre, L.length);
+    }
+    return cnt;
+}
+
+status AddList(LISTS &lists, const char ListName[]) {
+    if (lists.length >= 10)return OVERFLOW;
+    if (LocateList(lists, ListName)) return ERROR;
+    int i = 0;
+    while ((((lists.elem)[lists.length]).name[i] = ListName[i]))i++;
+    ((lists.elem)[lists.length]).L.elem = nullptr;
+    lists.length++;
+    return OK;
+}
+
+status RemoveList(LISTS &lists, char ListName[]) {
+    int i = LocateList(lists, ListName);
+    if (!i) {
+        printf("该表不存在！\n");
+        return ERROR;
+    }
+    if (i == usingList + 1) {
+        printf("不能删除当前表！\n");
+        return ERROR;
+    }
+    i--;
+    if (usingList >= i)usingList--;
+    DestroyList(lists.elem[i].L);
+    for (; i < lists.length; i++) {
+        int j = 0;
+        while ((lists.elem[i].name[j] = lists.elem[i + 1].name[j]))j++;
+        DestroyList(lists.elem[i].L);
+        lists.elem[i].L = lists.elem[i + 1].L;
+    }
+    lists.length--;
+    return OK;
+
+}
+
+int LocateList(LISTS lists, const char ListName[])
+// 在Lists中查找一个名称为ListName的线性表，成功返回逻辑序号，否则返回0
+{
+    for (int i = 0; i < lists.length; i++) {
+        if (strcmp(lists.elem[i].name, ListName) != 0)continue;
+        return i + 1;
+    }
+    return 0;
 }
