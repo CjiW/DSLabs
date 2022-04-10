@@ -1,7 +1,6 @@
 /* Linear Table On Sequence Structure */
 #include <cstdio>
 #include <malloc.h>
-#include <windows.h>
 using namespace std;
 /*---------page 10 on textbook ---------*/
 #define TRUE 1
@@ -205,7 +204,7 @@ int main() {
         printf("    ║                  0. Exit                       ║\n");
         printf("    ╚════════════════════════════════════════════════╝\n");
         printf("    请选择你的操作[0~12]:");
-        scanf("%d", &op);
+        scanf_s("%d", &op);
         switch (op) {
             case 1:
                 switch (InitList(L)) {
@@ -273,7 +272,7 @@ int main() {
             case 6:
                 // printf("\n----GetElem功能待实现！\n");
                 printf("请输入元素位置:\n");
-                scanf("%d", &tmp);
+                scanf_s("%d", &tmp);
                 switch (GetElem(L, tmp, e)) {
                     case OK:
                         printf("第%d个元素为%d。\n", tmp, e);
@@ -291,7 +290,7 @@ int main() {
             case 7:
                 // printf("\n----LocateElem功能待实现！\n");
                 printf("请输入元素值:\n");
-                scanf("%d", &e);
+                scanf_s("%d", &e);
                 switch (tmp = LocateElem(L, e)) {
                     case ERROR:
                         printf("元素%d不存在！\n", e);
@@ -309,7 +308,7 @@ int main() {
             case 8:
                 // printf("\n----PriorElem功能待实现！\n");
                 printf("请输入当前元素值:\n");
-                scanf("%d", &e);
+                scanf_s("%d", &e);
                 switch (PriorElem(L, e, e)) {
                     case OK:
                         printf("前驱元素为%d。\n", e);
@@ -327,7 +326,7 @@ int main() {
             case 9:
                 // printf("\n----NextElem功能待实现！\n");
                 printf("请输入当前元素值:\n");
-                scanf("%d", &e);
+                scanf_s("%d", &e);
                 switch (NextElem(L, e, e)) {
                     case OK:
                         printf("后继元素为%d。\n", e);
@@ -345,9 +344,9 @@ int main() {
             case 10:
                 // printf("\n----ListInsert功能待实现！\n");
                 printf("请输入位置值:\n");
-                scanf("%d", &tmp);
+                scanf_s("%d", &tmp);
                 printf("请输入元素值:\n");
-                scanf("%d", &e);
+                scanf_s("%d", &e);
                 switch (ListInsert(L, tmp, e)) {
                     case OK:
                         printf("元素%d插入成功！\n", e);
@@ -368,7 +367,7 @@ int main() {
             case 11:
                 // printf("\n----ListDelete功能待实现！\n");
                 printf("请输入位置值:\n");
-                scanf("%d", &tmp);
+                scanf_s("%d", &tmp);
                 switch (ListDelete(L, tmp, e)) {
                     case OK:
                         printf("第%d个元素%d删除成功！\n", tmp, e);
@@ -430,6 +429,7 @@ int main() {
                 break;
             case 0:
                 break;
+            default:;
         }//end of switch
     }//end of while
     printf("欢迎下次再使用本系统！\n");
@@ -585,7 +585,7 @@ status LoadList(SqList &L, char FileName[]) {
                 if (new_base)L.elem = new_base;
                 else return OVERFLOW;
             }
-            fscanf(pRead, "%d", L.elem + i);
+            fscanf_s(pRead, "%d", L.elem + i);
         }
         fclose(pRead);
         return OK;
