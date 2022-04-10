@@ -2,7 +2,6 @@
 #include <cstdio>
 #include <malloc.h>
 using namespace std;
-/*---------page 10 on textbook ---------*/
 #define TRUE 1
 #define FALSE 0
 #define OK 1
@@ -13,7 +12,6 @@ using namespace std;
 typedef int status;
 typedef int ElemType; //数据元素类型定义
 
-/*-------page 22 on textbook -------*/
 #define LIST_INIT_SIZE 100
 #define LISTINCREMENT  10
 typedef struct {  //顺序表（顺序结构）的定义
@@ -176,8 +174,30 @@ status ListDelete(SqList &L, int i, ElemType &e);
  */
 status ListTraverse(SqList L);
 
+/*
+ * Function:          SaveList
+ * Description:       存储顺序表
+ * Calls:             fopen, fprintf, fclose
+ * Input:
+ *  - SqList L        顺序表
+ *  - char FileName[] 文件路径
+ * Return:
+ *  - status          OK|ERROR|INFEASIBLE
+ * Output:            None
+ */
 status SaveList(SqList L, char FileName[]);
 
+/*
+ * Function:          LoadList
+ * Description:       加载顺序表
+ * Calls:             fopen, fscanf_s, fclose
+ * Input:
+ *  - SqList &L       顺序表引用
+ *  - char FileName[] 文件路径
+ * Return:
+ *  - status          OK|ERROR|OVERFLOW|INFEASIBLE
+ * Output:            None
+ */
 status LoadList(SqList &L, char FileName[]);
 
 /*--------------------------------------------*/
@@ -440,7 +460,7 @@ int main() {
     getchar();
     return 0;
 }//end of main()
-/*--------page 23 on textbook --------------------*/
+/*--------------------------------------------*/
 status InitList(SqList &L) {
 
     if (L.elem)return INFEASIBLE;
