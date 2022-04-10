@@ -16,11 +16,11 @@ typedef int ElemType; //数据元素类型定义
 /*-------page 22 on textbook -------*/
 #define LIST_INIT_SIZE 100
 #define LISTINCREMENT  10
-typedef struct{  //顺序表（顺序结构）的定义
-    ElemType * elem;
+typedef struct {  //顺序表（顺序结构）的定义
+    ElemType *elem;
     int length;
     int listSize;
-}SqList;
+} SqList;
 
 /*
  * Function:        InitList
@@ -32,7 +32,7 @@ typedef struct{  //顺序表（顺序结构）的定义
  *  - status        OK|INFEASIBLE|OVERFLOW
  * Output:          None
  */
-status InitList(SqList&L);
+status InitList(SqList &L);
 
 /*
  * Function:        DestroyList
@@ -44,7 +44,7 @@ status InitList(SqList&L);
  *  - status        OK|INFEASIBLE
  * Output:          None
  */
-status DestroyList(SqList&L);
+status DestroyList(SqList &L);
 
 /*
  * Function:        ClearList
@@ -56,7 +56,7 @@ status DestroyList(SqList&L);
  *  - status        OK|INFEASIBLE
  * Output:          None
  */
-status ClearList(SqList&L);
+status ClearList(SqList &L);
 
 /*
  * Function:        ListEmpty
@@ -218,7 +218,8 @@ int main() {
                         printf("线性表已存在！\n");
                         break;
                 }
-                getchar();getchar();
+                getchar();
+                getchar();
                 break;
             case 2:
                 // printf("\n----DestroyList功能待实现！\n");
@@ -230,7 +231,8 @@ int main() {
                         printf("线性表未初始化！\n");
                         break;
                 }
-                getchar();getchar();
+                getchar();
+                getchar();
                 break;
             case 3:
                 // printf("\n----ClearList功能待实现！\n");
@@ -242,7 +244,8 @@ int main() {
                         printf("线性表未初始化！\n");
                         break;
                 }
-                getchar();getchar();
+                getchar();
+                getchar();
                 break;
             case 4:
                 // printf("\n----ListEmpty功能待实现！\n");
@@ -438,16 +441,17 @@ int main() {
     return 0;
 }//end of main()
 /*--------page 23 on textbook --------------------*/
-status InitList(SqList&L){
+status InitList(SqList &L) {
 
     if (L.elem)return INFEASIBLE;
-    L.elem = (ElemType *)malloc(LIST_INIT_SIZE * sizeof(ElemType));
-    if(!L.elem) return OVERFLOW;
-    L.length=0;
-    L.listSize=LIST_INIT_SIZE;
+    L.elem = (ElemType *) malloc(LIST_INIT_SIZE * sizeof(ElemType));
+    if (!L.elem) return OVERFLOW;
+    L.length = 0;
+    L.listSize = LIST_INIT_SIZE;
     return OK;
 }
-status DestroyList(SqList&L){
+
+status DestroyList(SqList &L) {
     if (L.elem) {
         free(L.elem);
         L.elem = nullptr;
@@ -456,7 +460,8 @@ status DestroyList(SqList&L){
         return OK;
     } else return INFEASIBLE;
 }
-status ClearList(SqList&L) {
+
+status ClearList(SqList &L) {
     if (L.elem) {
         L.length = 0;
         return OK;
@@ -517,7 +522,8 @@ status NextElem(SqList L, ElemType cur, ElemType &next_e) {
         return ERROR;
     } else return INFEASIBLE;
 }
-status ListInsert(SqList&L,int i,ElemType e){
+
+status ListInsert(SqList &L, int i, ElemType e) {
     if (L.elem) {
         if (i > L.length + 1 || i <= 0)return ERROR;
         if (L.length == L.listSize) {
@@ -532,7 +538,8 @@ status ListInsert(SqList&L,int i,ElemType e){
         return OK;
     } else return INFEASIBLE;
 }
-status ListDelete(SqList&L,int i,ElemType&e) {
+
+status ListDelete(SqList &L, int i, ElemType &e) {
     if (L.elem) {
         if (i <= 0 || i > L.length)return ERROR;
         e = L.elem[i - 1];
