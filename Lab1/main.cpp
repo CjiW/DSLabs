@@ -858,9 +858,7 @@ status RemoveList(LISTS &lists, char ListName[]) {
 
 }
 
-int LocateList(LISTS lists, const char ListName[])
-// 在Lists中查找一个名称为ListName的线性表，成功返回逻辑序号，否则返回0
-{
+int LocateList(LISTS lists, const char ListName[]) {
     for (int i = 0; i < lists.length; i++) {
         if (strcmp(lists.elem[i].name, ListName) != 0)continue;
         return i + 1;
