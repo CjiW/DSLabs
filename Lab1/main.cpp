@@ -177,7 +177,7 @@ status ListTraverse(SqList L);
 /*
  * Function:          SaveList
  * Description:       存储顺序表
- * Calls:             fopen, fprintf, fclose
+ * Calls:             fopen, fwrite, fclose
  * Input:
  *  - SqList L        顺序表
  *  - char FileName[] 文件路径
@@ -190,7 +190,7 @@ status SaveList(SqList L, char FileName[]);
 /*
  * Function:          LoadList
  * Description:       加载顺序表
- * Calls:             fopen, fscanf_s, fclose
+ * Calls:             fopen, fread, fclose, ListInsert
  * Input:
  *  - SqList &L       顺序表引用
  *  - char FileName[] 文件路径
@@ -589,32 +589,22 @@ status SaveList(SqList L, char FileName[]) {
     if (!L.elem)return INFEASIBLE;
     FILE *pWrite = fopen(FileName, "w+");
     if (pWrite) {
-        for (int i = 0; i < L.length; i++) {
-            fprintf(pWrite, "%d ", L.elem[i]);
-        }
+        fwrite(L.elem, sizeof(ElemType), L.length, pWrite);
         fclose(pWrite);
         return OK;
     } else return ERROR;
 }
 
 status LoadList(SqList &L, char FileName[]) {
-    if (L.elem)return INFEASIBLE;
-    L.elem = (ElemType *) malloc(LIST_INIT_SIZE * sizeof(ElemType));
-    if (!L.elem) return OVERFLOW;
-    L.length = 0;
-    L.listSize = LIST_INIT_SIZE;
+    ElemType tmp;
+    status s;
+    s = InitList(L);
+    if (s != OK) return s;
     FILE *pRead = fopen(FileName, "r");
     if (pRead) {
-        for (int i = 0; !feof(pRead); L.length = i++) {
-            if (L.length == L.listSize) {
-                auto *new_base = (ElemType *) realloc(L.elem,
-                                                      (L.listSize = L.listSize + LISTINCREMENT) * sizeof(ElemType));
-                if (new_base)L.elem = new_base;
-                else return OVERFLOW;
-            }
-            fscanf_s(pRead, "%d", L.elem + i);
-        }
+        while (s == OK && fread(&tmp, sizeof(ElemType), 1, pRead))
+            s = ListInsert(L, L.length + 1, tmp);
         fclose(pRead);
-        return OK;
+        return s;
     } else return ERROR;
 }
