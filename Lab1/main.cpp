@@ -269,7 +269,7 @@ int main() {
         printf("    ║     15. MaxSubArray       16. SubArrayNum      ║\n");
         printf("    ║     17. sortList          18. RemoveList       ║\n");
         printf("    ║     19. ChangeList        20. AddList          ║\n");
-        printf("    ║                  0. Exit                       ║\n");
+        printf("    ║     21. LocateList        0. Exit              ║\n");
         printf("    ╚════════════════════════════════════════════════╝\n");
         printf("    请选择你的操作[0~20]:");
         scanf_s("%d", &op);
@@ -559,6 +559,18 @@ int main() {
                 getchar();
                 getchar();
                 break;
+            case 21:
+                printf("请输入表名:\n");
+                scanf_s("%s", s);
+                tmp = LocateList(Lists, s);
+                if (!tmp) {
+                    printf("%s表不存在！\n", s);
+                } else {
+                    printf("%s是第%d个表。\n", s, tmp - 1);
+                }
+                getchar();
+                getchar();
+                break;
             case 0:
                 break;
             default:;
@@ -696,7 +708,7 @@ status ListTraverse(SqList L) {
 
 status SaveList(SqList L, char FileName[]) {
     if (!L.elem)return INFEASIBLE;
-    FILE *pWrite = fopen(FileName, "w+");
+    FILE *pWrite = fopen(FileName, "wb+");
     if (pWrite) {
         fwrite(L.elem, sizeof(ElemType), L.length, pWrite);
         fclose(pWrite);
@@ -709,7 +721,7 @@ status LoadList(SqList &L, char FileName[]) {
     status s;
     s = InitList(L);
     if (s != OK) return s;
-    FILE *pRead = fopen(FileName, "r");
+    FILE *pRead = fopen(FileName, "rb");
     if (pRead) {
         while (s == OK && fread(&tmp, sizeof(ElemType), 1, pRead))
             s = ListInsert(L, L.length + 1, tmp);
@@ -740,7 +752,7 @@ status sortList(SqList L) {
             int start1 = low, end1 = mid;
             int start2 = mid, end2 = high;
             while (start1 < end1 && start2 < end2)
-                b[k++] = a[start1] > a[start2] ? a[start1++] : a[start2++];
+                b[k++] = a[start1] < a[start2] ? a[start1++] : a[start2++];
             while (start1 < end1)
                 b[k++] = a[start1++];
             while (start2 < end2)
