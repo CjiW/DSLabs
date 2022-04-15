@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <malloc.h>
+#include <cstring>
 
 #define TRUE 1
 #define FALSE 0
@@ -8,131 +9,308 @@
 #define INFEASIBLE -1
 #define OVERFLOW -2
 typedef int status;
-typedef int ElemType; //æ•°æ®å…ƒç´ ç±»åž‹å®šä¹‰
+typedef int ElemType; //Êý¾ÝÔªËØÀàÐÍ¶¨Òå
 typedef int ElemType;
-typedef struct LNode{  //å•é“¾è¡¨ï¼ˆé“¾å¼ç»“æž„ï¼‰ç»“ç‚¹çš„å®šä¹‰
+typedef struct LNode{  //µ¥Á´±í£¨Á´Ê½½á¹¹£©½áµãµÄ¶¨Òå
     ElemType data;
     struct LNode *next;
 }LNode,*LinkList;
-
+typedef struct {  //ÏßÐÔ±íµÄ¼¯ºÏÀàÐÍ¶¨Òå
+    struct {
+        char name[30];
+        LinkList L;
+    } elem[10];
+    int length;
+} LISTS;
+LISTS Lists;      //ÏßÐÔ±í¼¯ºÏµÄ¶¨ÒåLists
+int usingList = 0;
 status InitList(LinkList & L);
 status DestroyList(LinkList & L);
 status ClearList(LinkList&L);
 status ListEmpty(LinkList L);
 int ListLength(LinkList L);
 status GetElem(LinkList L,int i,ElemType& e);
-int LocateElem(LinkList L,ElemType e); //ç®€åŒ–è¿‡
-status PriorElem(LinkList L,ElemType cur,ElemType &pre_e);
-status NextElem(LinkList,ElemType cur,ElemType&next_e);
+int LocateElem(LinkList L,ElemType e); //¼ò»¯¹ý
+status PriorElem(LinkList L,ElemType e,ElemType &pre_e);
+status NextElem(LinkList,ElemType e,ElemType&next_e);
 status ListInsert(LinkList&L,int i,ElemType e);
 status ListDelete(LinkList &L,int i,ElemType& e);
 status ListTraverse(LinkList L);
+status SaveList(LinkList L, char FileName[]);
+status LoadList(LinkList &L, char FileName[]);
+status AddList(LISTS &lists, const char ListName[]);
+status RemoveList(LISTS &lists, char ListName[]);
+int LocateList(LISTS lists, const char ListName[]);
 int main(){
-    LinkList L;  int op=1,tmp;
-    char filename[100];
+    int op=1,tmp;
+    ElemType e;
+    char filename[100],s[30];
+    for (auto &i: Lists.elem) {
+        i.L = nullptr;
+    }
+    Lists.length = 1;
+    strcpy(Lists.elem[usingList].name, "Default");
     while(op){
-        system("cls");	printf("\n\n");
-        printf("      Menu for Linear Table On Sequence Structure \n");
-        printf("-------------------------------------------------\n");
-        printf("    	  1. InitList       7. LocateElem\n");
-        printf("    	  2. DestroyList8. PriorElem\n");
-        printf("    	  3. ClearList       9. NextElem \n");
-        printf("    	  4. ListEmpty     10. ListInsert\n");
-        printf("    	  5. ListLength     11. ListDelete\n");
-        printf("    	  6. GetElem       12. ListTraverse\n");
-        printf("    	  0. Exit\n");
-        printf("-------------------------------------------------\n");
-        printf("    è¯·é€‰æ‹©ä½ çš„æ“ä½œ[0~12]:");
-        scanf("%d",&op);
+        system("cls");
+        printf("\n\n");
+        printf("    ¨X¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨[\n");
+        printf("    ¨U               %d-%-10s                     ¨U\n", usingList, Lists.elem[usingList].name);
+        printf("    ¨c©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤¨f\n");
+        printf("    ¨U     1. InitList           2. DestroyList       ¨U\n");
+        printf("    ¨U     3. ClearList          4. ListEmpty         ¨U\n");
+        printf("    ¨U     5. ListLength         6. GetElem           ¨U\n");
+        printf("    ¨U     7. LocateElem         8. PriorElem         ¨U\n");
+        printf("    ¨U     9. NextElem           10. ListInsert       ¨U\n");
+        printf("    ¨U     11. ListDelete        12. ListTraverse     ¨U\n");
+        printf("    ¨U     13. SaveList          14. LoadList         ¨U\n");
+        printf("    ¨U     15. sortList          16. AddList          ¨U\n");
+        printf("    ¨U     17. RemoveList        18. ChangeList       ¨U\n");
+        printf("    ¨U     19. LocateList        0. Exit              ¨U\n");
+        printf("    ¨^¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨a\n");
+        printf("    ÇëÑ¡ÔñÄãµÄ²Ù×÷[0~20]:");
+        scanf_s("%d",&op);
         switch(op){
             case 1:
-                //printf("\n----IntiListåŠŸèƒ½å¾…å®žçŽ°ï¼\n");
-                switch (InitList(L)) {
+                //printf("\n----IntiList¹¦ÄÜ´ýÊµÏÖ£¡\n");
+                switch (InitList(Lists.elem[usingList].L)) {
                     case OK:
-                        printf("é“¾è¡¨åˆ›å»ºæˆåŠŸï¼\n");break;
+                        printf("Á´±í´´½¨³É¹¦£¡\n");break;
                     case OVERFLOW:
-                        printf("å†…å­˜åˆ†é…å¤±è´¥ï¼\n");break;
+                        printf("ÄÚ´æ·ÖÅäÊ§°Ü£¡\n");break;
                     case INFEASIBLE:
-                        printf("é“¾è¡¨å·²å­˜åœ¨ï¼\n");break;
+                        printf("Á´±íÒÑ´æÔÚ£¡\n");break;
                 }
                 getchar();getchar();
                 break;
             case 2:
-                // printf("\n----DestroyListåŠŸèƒ½å¾…å®žçŽ°ï¼\n");
-                switch (DestroyList(L)) {
+                // printf("\n----DestroyList¹¦ÄÜ´ýÊµÏÖ£¡\n");
+                switch (DestroyList(Lists.elem[usingList].L)) {
                     case OK:
-                        printf("é“¾è¡¨é”€æ¯æˆåŠŸï¼\n");break;
+                        printf("Á´±íÏú»Ù³É¹¦£¡\n");break;
                     case INFEASIBLE:
-                        printf("é“¾è¡¨æœªåˆå§‹åŒ–ï¼\n");break;
+                        printf("Á´±íÎ´³õÊ¼»¯£¡\n");break;
                 }
                 getchar();getchar();
                 break;
             case 3:
-                // printf("\n----ClearListåŠŸèƒ½å¾…å®žçŽ°ï¼\n");
-                switch (ClearList(L)) {
+                // printf("\n----ClearList¹¦ÄÜ´ýÊµÏÖ£¡\n");
+                switch (ClearList(Lists.elem[usingList].L)) {
                     case OK:
-                        printf("é“¾è¡¨æ¸…ç©ºæˆåŠŸï¼\n");break;
+                        printf("Á´±íÇå¿Õ³É¹¦£¡\n");break;
                     case INFEASIBLE:
-                        printf("é“¾è¡¨æœªåˆå§‹åŒ–ï¼\n");break;
+                        printf("Á´±íÎ´³õÊ¼»¯£¡\n");break;
                 }
                 getchar();getchar();
                 break;
             case 4:
-                // printf("\n----ListEmptyåŠŸèƒ½å¾…å®žçŽ°ï¼\n");
-                switch (ListEmpty(L)) {
+                // printf("\n----ListEmpty¹¦ÄÜ´ýÊµÏÖ£¡\n");
+                switch (ListEmpty(Lists.elem[usingList].L)) {
                     case TRUE:
-                        printf("é“¾è¡¨ä¸ºç©ºã€‚\n");break;
+                        printf("Á´±íÎª¿Õ¡£\n");break;
                     case FALSE:
-                        printf("é“¾è¡¨ä¸ä¸ºç©ºã€‚\n");break;
+                        printf("Á´±í²»Îª¿Õ¡£\n");break;
                     case INFEASIBLE:
-                        printf("é“¾è¡¨æœªåˆå§‹åŒ–ï¼\n");break;
+                        printf("Á´±íÎ´³õÊ¼»¯£¡\n");break;
                 }
                 getchar();getchar();
                 break;
             case 5:
-                // printf("\n----ListLengthåŠŸèƒ½å¾…å®žçŽ°ï¼\n");
-                if ((tmp=ListLength(L))==INFEASIBLE) printf("é“¾è¡¨æœªåˆå§‹åŒ–ï¼\n");
-                else printf("é“¾è¡¨é•¿åº¦ä¸º%dã€‚\n",tmp);
+                // printf("\n----ListLength¹¦ÄÜ´ýÊµÏÖ£¡\n");
+                if ((tmp=ListLength(Lists.elem[usingList].L))==INFEASIBLE) printf("Á´±íÎ´³õÊ¼»¯£¡\n");
+                else printf("Á´±í³¤¶ÈÎª%d¡£\n",tmp);
                 getchar();getchar();
                 break;
             case 6:
-                // printf("\n----GetElemåŠŸèƒ½å¾…å®žçŽ°ï¼\n");
-                printf("");//TODO
-                // switch (GetElem()) {
-                //
-                // }
+                // printf("\n----GetElem¹¦ÄÜ´ýÊµÏÖ£¡\n");
+                printf("ÇëÊäÈëÔªËØÎ»Ðò:\n");
+                scanf("%d",&tmp);
+                switch (GetElem(Lists.elem[usingList].L,tmp,e)) {
+                    case INFEASIBLE:
+                        printf("Á´±íÎ´³õÊ¼»¯£¡\n");break;
+                    case ERROR:
+                        printf("Î»Ðò%d·Ç·¨£¡\n",tmp);break;
+                    case OK:
+                        printf("Î»ÐòÎª%dµÄÔªËØÎª%d¡£\n",tmp,e);break;
+                }
                 getchar();getchar();
                 break;
             case 7:
-                printf("\n----LocateElemåŠŸèƒ½å¾…å®žçŽ°ï¼\n");
+                // printf("\n----LocateElem¹¦ÄÜ´ýÊµÏÖ£¡\n");
+                printf("ÇëÊäÈëÔªËØ:\n");
+                scanf("%d",&e);
+                switch (tmp=LocateElem(Lists.elem[usingList].L,e)) {
+                    case INFEASIBLE:
+                        printf("Á´±íÎ´³õÊ¼»¯£¡\n");break;
+                    case ERROR:
+                        printf("ÔªËØ%d²»´æÔÚ£¡\n",e);break;
+                    case OK:
+                        printf("ÔªËØ%dµÄÎ»ÐòÎª%d¡£\n",e,tmp);break;
+                }
                 getchar();getchar();
                 break;
             case 8:
-                printf("\n----PriorElemåŠŸèƒ½å¾…å®žçŽ°ï¼\n");
+                // printf("\n----PriorElem¹¦ÄÜ´ýÊµÏÖ£¡\n");
+                printf("ÇëÊäÈëµ±Ç°ÔªËØ:\n");
+                scanf("%d",&e);
+                switch (PriorElem(Lists.elem[usingList].L,e,e)) {
+                    case INFEASIBLE:
+                        printf("Á´±íÎ´³õÊ¼»¯£¡\n");break;
+                    case ERROR:
+                        printf("ÔªËØ%dÇ°Çý²»´æÔÚ£¡\n",e);break;
+                    case OK:
+                        printf("Ç°ÇýÎª%d¡£\n",e);break;
+                }
                 getchar();getchar();
                 break;
             case 9:
-                printf("\n----NextElemåŠŸèƒ½å¾…å®žçŽ°ï¼\n");
+                // printf("\n----NextElem¹¦ÄÜ´ýÊµÏÖ£¡\n");
+                printf("ÇëÊäÈëµ±Ç°ÔªËØ:\n");
+                scanf("%d",&e);
+                switch (NextElem(Lists.elem[usingList].L,e,e)) {
+                    case INFEASIBLE:
+                        printf("Á´±íÎ´³õÊ¼»¯£¡\n");break;
+                    case ERROR:
+                        printf("ÔªËØ%dºó¼Ì²»´æÔÚ£¡\n",e);break;
+                    case OK:
+                        printf("ºó¼ÌÎª%d¡£\n",e);break;
+                }
                 getchar();getchar();
                 break;
             case 10:
-                printf("\n----ListInsertåŠŸèƒ½å¾…å®žçŽ°ï¼\n");
+                // printf("\n----ListInsert¹¦ÄÜ´ýÊµÏÖ£¡\n");
+                printf("ÇëÊäÈëÎ»Ðò:\n");
+                scanf("%d",&tmp);
+                printf("ÇëÊäÈëÔªËØ:\n");
+                scanf("%d",&e);
+                switch (ListInsert(Lists.elem[usingList].L,tmp,e)) {
+                    case INFEASIBLE:
+                        printf("Á´±íÎ´³õÊ¼»¯£¡\n");break;
+                    case ERROR:
+                        printf("Î»Ðò%d·Ç·¨£¡\n",tmp);break;
+                    case OK:
+                        printf("ÔªËØ%d²åÈë³É¹¦£¡\n",e);break;
+                    case OVERFLOW:
+                        printf("ÄÚ´æ·ÖÅäÊ§°Ü£¡\n");break;
+                }
                 getchar();getchar();
                 break;
             case 11:
-                printf("\n----ListDeleteåŠŸèƒ½å¾…å®žçŽ°ï¼\n");
+                // printf("\n----ListDelete¹¦ÄÜ´ýÊµÏÖ£¡\n");
+                printf("ÇëÊäÈëÎ»Ðò:\n");
+                scanf("%d",&tmp);
+                switch (ListDelete(Lists.elem[usingList].L,tmp,e)) {
+                    case INFEASIBLE:
+                        printf("Á´±íÎ´³õÊ¼»¯£¡\n");break;
+                    case ERROR:
+                        printf("Î»Ðò%d·Ç·¨£¡\n",tmp);break;
+                    case OK:
+                        printf("%dºÅÔªËØ%dÉ¾³ý³É¹¦£¡\n",tmp,e);break;
+                }
                 getchar();getchar();
                 break;
             case 12:
-                //printf("\n----ListTrabverseåŠŸèƒ½å¾…å®žçŽ°ï¼\n");
-                ListTraverse(L);
+                //printf("\n----ListTrabverse¹¦ÄÜ´ýÊµÏÖ£¡\n");
+                switch (ListTraverse(Lists.elem[usingList].L)) {
+                    case INFEASIBLE:
+                        printf("Á´±íÎ´³õÊ¼»¯£¡\n");break;
+                    case ERROR:
+                        printf("Á´±íÎª¿Õ£¡\n");break;
+                }
                 getchar();getchar();
+                break;
+            case 13:
+                printf("ÇëÊäÈëÎÄ¼þÂ·¾¶:\n");
+                scanf("%s", filename);
+                switch (SaveList(Lists.elem[usingList].L, filename)) {
+                    case ERROR:
+                        printf("ÎÄ¼þ´ò¿ªÊ§°Ü£¡\n");
+                        break;
+                    case INFEASIBLE:
+                        printf("ÏßÐÔ±íÎ´³õÊ¼»¯£¡\n");
+                        break;
+                    case OK:
+                        printf("±£´æ³É¹¦£¡\n");
+                        break;
+                }
+                getchar();getchar();
+                break;
+            case 14:
+                printf("ÇëÊäÈëÎÄ¼þÂ·¾¶:\n");
+                scanf("%s", filename);
+                switch (LoadList(Lists.elem[usingList].L, filename)) {
+                    case ERROR:
+                        printf("ÎÄ¼þ´ò¿ªÊ§°Ü£¡\n");
+                        break;
+                    case INFEASIBLE:
+                        printf("ÏßÐÔ±íÒÑ´æÔÚ£¡\n");
+                        break;
+                    case OVERFLOW:
+                        printf("ÄÚ´æ·ÖÅäÊ§°Ü£¡\n");
+                        break;
+                    case OK:
+                        printf("¼ÓÔØ³É¹¦£¡\n");
+                        break;
+                }
+                getchar();getchar();
+                break;
+            case 16:
+                printf("ÇëÊäÈëÒª´´½¨µÄ±íÃû:\n");
+                scanf_s("%s", s);
+                switch (AddList(Lists, s)) {
+                    case OK:
+                        printf("´´½¨³É¹¦£¡\n");
+                        break;
+                    case OVERFLOW:
+                        printf("µ±Ç°±í¹ý¶à£¡\n");
+                        break;
+                    case ERROR:
+                        printf("±íÒÑ´æÔÚ£¡\n");
+                        break;
+                }
+                getchar();
+                getchar();
+                break;
+            case 17:
+                printf("ÇëÊäÈëÒªÉ¾³ýµÄ±íÃû:\n");
+                scanf_s("%s", s);
+                if (RemoveList(Lists, s) == ERROR)printf("É¾³ýÊ§°Ü£¡\n");
+                else printf("É¾³ý³É¹¦£¡\n");
+                getchar();
+                getchar();
+                break;
+            case 18:
+                printf("ÇëÊäÈëÒªÊ¹ÓÃµÄ±íÃû:\n");
+                scanf_s("%s", s);
+                tmp = LocateList(Lists, s);
+                if (tmp) {
+                    usingList = tmp - 1;
+                    printf("¸Ä±äÊ¹ÓÃ±í³É¹¦£¡\nµ±Ç°±í:%d-%s\n", usingList, Lists.elem[usingList].name);
+                } else {
+                    printf("±í²»´æÔÚ£¡\n");
+                }
+                getchar();
+                getchar();
+                break;
+
+            case 19:
+                printf("ÇëÊäÈë±íÃû:\n");
+                scanf_s("%s", s);
+                tmp = LocateList(Lists, s);
+                if (!tmp) {
+                    printf("%s±í²»´æÔÚ£¡\n", s);
+                } else {
+                    printf("%sÊÇµÚ%d¸ö±í¡£\n", s, tmp - 1);
+                }
+                getchar();
+                getchar();
                 break;
             case 0:
                 break;
         }//end of switch
     }//end of while
-    printf("æ¬¢è¿Žä¸‹æ¬¡å†ä½¿ç”¨æœ¬ç³»ç»Ÿï¼\n");
+    printf("»¶Ó­ÏÂ´ÎÔÙÊ¹ÓÃ±¾ÏµÍ³£¡\n");
+    getchar();
+    getchar();
     return 0;
 }//end of main()
 /*--------page 23 on textbook --------------------*/
@@ -266,11 +444,14 @@ status ListDelete(LinkList &L,int i,ElemType &e){
 }
 status ListTraverse(LinkList L){
     if(!L)return INFEASIBLE;
+    if(!L->next)return ERROR;
+    printf("\n-----------------All Elem----------------\n");
     LNode *p=L->next;
     while (p){
         printf("%d ",p->data);
         p=p->next;
     }
+    printf("\n-------------------End-------------------\n");
     return OK;
 }
 status SaveList(LinkList L,char FileName[]){
@@ -306,4 +487,45 @@ status LoadList(LinkList &L,char FileName[]){
     }
     fclose(pr);
     return OK;
+}
+status AddList(LISTS &lists, const char ListName[]) {
+    if (lists.length >= 10)return OVERFLOW;
+    if (LocateList(lists, ListName)) return ERROR;
+    int i = 0;
+    while ((((lists.elem)[lists.length]).name[i] = ListName[i]))i++;
+    ((lists.elem)[lists.length]).L = nullptr;
+    lists.length++;
+    return OK;
+}
+
+status RemoveList(LISTS &lists, char ListName[]) {
+    int i = LocateList(lists, ListName);
+    if (!i) {
+        printf("¸Ã±í²»´æÔÚ£¡\n");
+        return ERROR;
+    }
+    if (i == usingList + 1) {
+        printf("²»ÄÜÉ¾³ýµ±Ç°±í£¡\n");
+        return ERROR;
+    }
+    i--;
+    if (usingList >= i)usingList--;
+    DestroyList(lists.elem[i].L);
+    for (; i < lists.length; i++) {
+        int j = 0;
+        while ((lists.elem[i].name[j] = lists.elem[i + 1].name[j]))j++;
+        DestroyList(lists.elem[i].L);
+        lists.elem[i].L = lists.elem[i + 1].L;
+    }
+    lists.length--;
+    return OK;
+
+}
+
+int LocateList(LISTS lists, const char ListName[]) {
+    for (int i = 0; i < lists.length; i++) {
+        if (strcmp(lists.elem[i].name, ListName) != 0)continue;
+        return i + 1;
+    }
+    return 0;
 }
