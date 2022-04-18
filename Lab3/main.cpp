@@ -112,22 +112,45 @@ status DeleteNode(BiTree &T,KeyType e)
 status PreOrderTraverse(BiTree T,void (*visit)(BiTree))
 //先序遍历二叉树T
 {
-
+    if(!T)return OK;
+    visit(T);
+    PreOrderTraverse(T->lchild,visit);
+    PreOrderTraverse(T->rchild,visit);
+    return OK;
 }
 status InOrderTraverse(BiTree T,void (*visit)(BiTree))
 //中序遍历二叉树T
 {
-
+    BiTNode *tmp[100];int top=-1;
+    auto p=T;
+    while (p||top+1){
+        if(p){
+            tmp[++top]=p;
+            p=p->lchild;
+        } else{
+            p=tmp[top--];
+            visit(p);
+            p=p->rchild;
+        }
+    }
+    return OK;
 }
 status PostOrderTraverse(BiTree T,void (*visit)(BiTree))
 //后序遍历二叉树T
 {
-
+    if(!T)return OK;
+    PostOrderTraverse(T->lchild,visit);
+    PostOrderTraverse(T->rchild,visit);
+    visit(T);
+    return OK;
 }
 status LevelOrderTraverse(BiTree T,void (*visit)(BiTree))
 //按层遍历二叉树T
 {
+    BiTNode *tmp[100];int b=0,t=0;
+    auto p=T;
 
+    return OK;
 }
 
 status SaveBiTree(BiTree T, char FileName[])
