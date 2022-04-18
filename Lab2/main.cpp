@@ -36,6 +36,11 @@ status NextElem(LinkList,ElemType e,ElemType&next_e);
 status ListInsert(LinkList&L,int i,ElemType e);
 status ListDelete(LinkList &L,int i,ElemType& e);
 status ListTraverse(LinkList L);
+status sortList(LinkList L);
+LNode *mergeSortList(LNode *head);
+LNode *merge(LNode *head1, LNode *head2);
+status reverseList(LinkList L);
+status RemoveNthFromEnd(LinkList L,int n,ElemType&e);
 status SaveList(LinkList L, char FileName[]);
 status LoadList(LinkList &L, char FileName[]);
 status AddList(LISTS &lists, const char ListName[]);
@@ -62,10 +67,11 @@ int main(){
         printf("    ║     7. LocateElem         8. PriorElem         ║\n");
         printf("    ║     9. NextElem           10. ListInsert       ║\n");
         printf("    ║     11. ListDelete        12. ListTraverse     ║\n");
-        printf("    ║     13. SaveList          14. LoadList         ║\n");
-        printf("    ║     15. sortList          16. AddList          ║\n");
-        printf("    ║     17. RemoveList        18. ChangeList       ║\n");
-        printf("    ║     19. LocateList        0. Exit              ║\n");
+        printf("    ║     13. sortList          14. reverseList      ║\n");
+        printf("    ║     15. SaveList          16. LoadList         ║\n");
+        printf("    ║     17. AddList           18. RemoveList       ║\n");
+        printf("    ║     19. ChangeList        20. LocateList       ║\n");
+        printf("    ║     21. RemoveNthFromEnd  0. Exit              ║\n");
         printf("    ╚════════════════════════════════════════════════╝\n");
         printf("    请选择你的操作[0~20]:");
         scanf_s("%d",&op);
@@ -143,7 +149,7 @@ int main(){
                         printf("链表未初始化！\n");break;
                     case ERROR:
                         printf("元素%d不存在！\n",e);break;
-                    case OK:
+                    default:
                         printf("元素%d的位序为%d。\n",e,tmp);break;
                 }
                 getchar();getchar();
@@ -212,13 +218,36 @@ int main(){
                 //printf("\n----ListTrabverse功能待实现！\n");
                 switch (ListTraverse(Lists.elem[usingList].L)) {
                     case INFEASIBLE:
-                        printf("链表未初始化！\n");break;
+                        printf("链表未初始化！\n");
+                        break;
                     case ERROR:
-                        printf("链表为空！\n");break;
+                        printf("链表为空！\n");
+                        break;
                 }
                 getchar();getchar();
                 break;
             case 13:
+                if (sortList(Lists.elem[usingList].L) == OK) {
+                    printf("排序成功！\n");
+                } else {
+                    printf("链表未初始化！\n");
+                }
+                getchar();
+                getchar();
+                break;
+            case 14:
+                switch (reverseList(Lists.elem[usingList].L)) {
+                    case INFEASIBLE:
+                        printf("链表未初始化！\n");
+                        break;
+                    case OK:
+                        printf("翻转成功！\n");
+                        break;
+                }
+                getchar();
+                getchar();
+                break;
+            case 15:
                 printf("请输入文件路径:\n");
                 scanf("%s", filename);
                 switch (SaveList(Lists.elem[usingList].L, filename)) {
@@ -234,7 +263,7 @@ int main(){
                 }
                 getchar();getchar();
                 break;
-            case 14:
+            case 16:
                 printf("请输入文件路径:\n");
                 scanf("%s", filename);
                 switch (LoadList(Lists.elem[usingList].L, filename)) {
@@ -253,7 +282,7 @@ int main(){
                 }
                 getchar();getchar();
                 break;
-            case 16:
+            case 17:
                 printf("请输入要创建的表名:\n");
                 scanf_s("%s", s);
                 switch (AddList(Lists, s)) {
@@ -270,7 +299,7 @@ int main(){
                 getchar();
                 getchar();
                 break;
-            case 17:
+            case 18:
                 printf("请输入要删除的表名:\n");
                 scanf_s("%s", s);
                 if (RemoveList(Lists, s) == ERROR)printf("删除失败！\n");
@@ -278,7 +307,7 @@ int main(){
                 getchar();
                 getchar();
                 break;
-            case 18:
+            case 19:
                 printf("请输入要使用的表名:\n");
                 scanf_s("%s", s);
                 tmp = LocateList(Lists, s);
@@ -292,7 +321,7 @@ int main(){
                 getchar();
                 break;
 
-            case 19:
+            case 20:
                 printf("请输入表名:\n");
                 scanf_s("%s", s);
                 tmp = LocateList(Lists, s);
@@ -300,6 +329,20 @@ int main(){
                     printf("%s表不存在！\n", s);
                 } else {
                     printf("%s是第%d个表。\n", s, tmp - 1);
+                }
+                getchar();
+                getchar();
+                break;
+            case 21:
+                printf("请输入结点的倒数序号:\n");
+                scanf_s("%d",&tmp);
+                switch (RemoveNthFromEnd(Lists.elem[usingList].L, tmp,e)) {
+                    case ERROR:
+                        printf("序号%d非法！\n",tmp);break;
+                    case INFEASIBLE:
+                        printf("链表未初始化！\n");break;
+                    case OK:
+                        printf("倒数第%d个结点%d删除成功！\n",tmp,e);break;
                 }
                 getchar();
                 getchar();
@@ -454,6 +497,67 @@ status ListTraverse(LinkList L){
     printf("\n-------------------End-------------------\n");
     return OK;
 }
+status sortList(LinkList L) {
+    if(!L)return INFEASIBLE;
+    mergeSortList(L);
+    return OK;
+}
+LNode *mergeSortList(LNode *head) {
+    if(head == nullptr || head->next == nullptr)return head;
+    else{
+        //快慢指针找到中间节点
+        LNode *fast = head,*slow = head;
+        while(fast->next != nullptr && fast->next->next != nullptr)
+        {
+            fast = fast->next->next;
+            slow = slow->next;
+        }
+        fast = slow;
+        slow = slow->next;
+        fast->next = nullptr;
+        fast = mergeSortList(head);//前半段排序
+        slow = mergeSortList(slow);//后半段排序
+        return merge(fast,slow);
+    }
+
+}
+LNode *merge(LNode *head1, LNode *head2){
+    if(head1 == nullptr)return head2;
+    if(head2 == nullptr)return head1;
+    LNode *res , *p ;
+    if(head1->data < head2->data)
+    {res = head1; head1 = head1->next;}
+    else{res = head2; head2 = head2->next;}
+    p = res;
+    while(head1 != nullptr && head2 != nullptr){
+        if(head1->data < head2->data){
+            p->next = head1;
+            head1 = head1->next;
+        }
+        else{
+            p->next = head2;
+            head2 = head2->next;
+        }
+        p = p->next;
+    }
+    if(head1 != nullptr)p->next = head1;
+    else if(head2 != nullptr)p->next = head2;
+    return res;
+}
+status reverseList(LinkList L){
+    if(!L)return INFEASIBLE;
+    if(!L->next||!L->next->next)return OK;
+    LNode *p=L->next,*q= nullptr,*m=L->next,*n=L->next->next;
+    while (p->next)p=p->next;
+    L->next=p;
+    while (n!=p){
+        m->next=q;
+        q=m;m=n;n=n->next;
+    }
+    n->next=m;
+    m->next=q;
+    return OK;
+}
 status SaveList(LinkList L,char FileName[]){
     if(!L)return INFEASIBLE;
     FILE *pw= fopen(FileName,"wb");
@@ -479,8 +583,7 @@ status LoadList(LinkList &L,char FileName[]){
     while (true){
         auto*newNode=(LNode*)malloc(sizeof(LNode));
         if(!newNode)return OVERFLOW;
-        fread(&(newNode->data),sizeof(int),1,pr);
-        if(!newNode->data)break;
+        if(!fread(&(newNode->data),sizeof(int),1,pr))break;
         newNode->next=p->next;
         p->next=newNode;
         p=newNode;
@@ -528,4 +631,23 @@ int LocateList(LISTS lists, const char ListName[]) {
         return i + 1;
     }
     return 0;
+}
+status RemoveNthFromEnd(LinkList L,int n,ElemType&e){
+    if(!L)return INFEASIBLE;
+    if(n<=0)return ERROR;
+    LNode *p=L,*q=L;
+    for (int i = 0; i < n; i++) {
+        q=q->next;
+        if(!q)return ERROR;
+    }
+    q=q->next;
+    while (q){
+        p=p->next;
+        q=q->next;
+    }
+    q=p->next;
+    p->next=p->next->next;
+    e=q->data;
+    free(q);
+    return OK;
 }
