@@ -32,13 +32,18 @@ status PostOrderTraverse(BiTree T,void (*visit)(BiTree));
 status LevelOrderTraverse(BiTree T,void (*visit)(BiTree));
 status SaveBiTree(BiTree T, char FileName[]);
 status LoadBiTree(BiTree &T,  char FileName[]);
+void visit(BiTree T);
 int max(int a,int b);
 int main() {
-    TElemType D[]={1 ,"a", 2 ,"b", 0, "null",0,"null",3,"c",4,"d",
+    TElemType D[]={1 ,"a", 2 ,"b", 0, "null",0,"null",6,"c",4,"d",
                    0,"null", 0,"null",5,"e",0,"null",0,"null",-1,"null"};
     BiTree T=nullptr;
     CreateBiTree(T,D);
+    PostOrderTraverse(T,visit);
     return 0;
+}
+void visit(BiTree T){
+    printf("%d\n",T->data.key);
 }
 status CreateBiTree(BiTree &T,TElemType definition[]){
     if (T)return INFEASIBLE;
@@ -99,16 +104,16 @@ BiTNode* GetSibling(BiTree T,KeyType e)
     if((tmp=GetSibling(T->rchild,e)))return tmp;
     return nullptr;
 }
-status InsertNode(BiTree &T,KeyType e,int LR,TElemType c)
-//插入结点。此题允许通过增加其它函数辅助实现本关任务
-{
-
-}
-status DeleteNode(BiTree &T,KeyType e)
-//删除结点。此题允许通过增加其它函数辅助实现本关任务
-{
-
-}
+// status InsertNode(BiTree &T,KeyType e,int LR,TElemType c)
+// //插入结点。此题允许通过增加其它函数辅助实现本关任务
+// {
+//
+// }
+// status DeleteNode(BiTree &T,KeyType e)
+// //删除结点。此题允许通过增加其它函数辅助实现本关任务
+// {
+//
+// }
 status PreOrderTraverse(BiTree T,void (*visit)(BiTree))
 //先序遍历二叉树T
 {
@@ -147,22 +152,37 @@ status PostOrderTraverse(BiTree T,void (*visit)(BiTree))
 status LevelOrderTraverse(BiTree T,void (*visit)(BiTree))
 //按层遍历二叉树T
 {
-    BiTNode *tmp[100];int b=0,t=0;
-    auto p=T;
+    // 队空 - h==t; 队满 - h-t==1
+    BiTNode *tmp[10000];int h=0,t=0;
+    tmp[t++]=T;
+    while (h!=t){ // 队不空
+        int x=t;
+        for (int i = h; i < x; i++) {
+            if(tmp[h]->lchild){
+                if (h-t==1)return OVERFLOW;
+                tmp[t++]=tmp[h]->lchild;
+            }
+            if(tmp[h]->rchild){
+                if (h-t==1)return OVERFLOW;
+                tmp[t++]=tmp[h]->rchild;
+            }
+            visit(tmp[h++]); //出队
+        }
+    }
 
     return OK;
 }
 
-status SaveBiTree(BiTree T, char FileName[])
-//将二叉树的结点数据写入到文件FileName中
-{
-
-}
-status LoadBiTree(BiTree &T,  char FileName[])
-//读入文件FileName的结点数据，创建二叉树
-{
-
-}
+// status SaveBiTree(BiTree T, char FileName[])
+// //将二叉树的结点数据写入到文件FileName中
+// {
+//
+// }
+// status LoadBiTree(BiTree &T,  char FileName[])
+// //读入文件FileName的结点数据，创建二叉树
+// {
+//
+// }
 int max(int a,int b){
     return a>b?a:b;
 }
