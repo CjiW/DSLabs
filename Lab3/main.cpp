@@ -33,17 +33,38 @@ status LevelOrderTraverse(BiTree T,void (*visit)(BiTree));
 status SaveBiTree(BiTree T, char FileName[]);
 status LoadBiTree(BiTree &T,  char FileName[]);
 void visit(BiTree T);
+status save(BiTree T,FILE *fw);
 int max(int a,int b);
 int main() {
-    TElemType D[]={1 ,"a", 2 ,"b", 0, "null",0,"null",6,"c",4,"d",
-                   0,"null", 0,"null",5,"e",0,"null",0,"null",-1,"null"};
+    TElemType D[]={
+            {1, "a"},
+            {2, "b"},
+            {0, "null"},
+            {6, "f"},
+            {0, "null"},
+            {0, "null"},
+            {3, "c"},
+            {4, "d"},
+            {0, "null"},
+            {0, "null"},
+            {5, "e"},
+            {0, "null"},
+            {0, "null"},
+            {-1, "null"}
+    };
     BiTree T=nullptr;
     CreateBiTree(T,D);
-    PostOrderTraverse(T,visit);
+    PreOrderTraverse(T,visit);
+    putchar('\n');
+    char fn[]="./a";
+    ClearBiTree(T);
+    LoadBiTree(T,fn);
+    PreOrderTraverse(T,visit);
+    printf("\n%d", BiTreeDepth(T));
     return 0;
 }
 void visit(BiTree T){
-    printf("%d\n",T->data.key);
+    printf("%d ",T->data.key);
 }
 status CreateBiTree(BiTree &T,TElemType definition[]){
     if (T)return INFEASIBLE;
@@ -93,9 +114,7 @@ status Assign(BiTree &T,KeyType e,TElemType value){
     tmp1->data=value;
     return OK;
 }
-BiTNode* GetSibling(BiTree T,KeyType e)
-//实现获得兄弟结点
-{
+BiTNode* GetSibling(BiTree T,KeyType e){
     BiTNode *tmp;
     if((!T->lchild)&&(!T->rchild))return nullptr;
     if(T->lchild&&T->lchild->data.key==e)return T->rchild;
@@ -104,16 +123,73 @@ BiTNode* GetSibling(BiTree T,KeyType e)
     if((tmp=GetSibling(T->rchild,e)))return tmp;
     return nullptr;
 }
-// status InsertNode(BiTree &T,KeyType e,int LR,TElemType c)
-// //插入结点。此题允许通过增加其它函数辅助实现本关任务
-// {
-//
-// }
-// status DeleteNode(BiTree &T,KeyType e)
-// //删除结点。此题允许通过增加其它函数辅助实现本关任务
-// {
-//
-// }
+status InsertNode(BiTree &T,KeyType e,int LR,TElemType c)
+// e是和T中结点关键字类型相同的给定值，LR为0或1，c是待插入结点；
+// 根据LR为0或者1，插入结点c到T中，作为关键字为e的结点的左或右孩子结点，结点e的原有左子树或右子树则为结点c的右子树，返回OK。
+// 如果插入失败，返回ERROR。
+// 特别地，当LR为-1时，作为根结点插入，原根结点作为c的右子树。
+{
+    if(LocateNode(T,c.key))return ERROR;
+    auto *tmp=(BiTNode*) malloc(sizeof(BiTNode));
+    tmp->data=c;
+    int status=ERROR;
+    if(T->data.key==e||LR==-1){
+        switch (LR) {
+            case -1:
+                tmp->rchild=T;
+                tmp->lchild= nullptr;
+                T=tmp;
+                break;
+            case 0:
+                tmp->lchild=T->lchild;
+                tmp->rchild= nullptr;
+                T->lchild=tmp;
+                break;
+            case 1:
+                tmp->rchild=T->rchild;
+                tmp->lchild= nullptr;
+                T->rchild=tmp;
+                break;
+        }
+        status=OK;
+    } else{
+        if(T->lchild){
+            status|=InsertNode(T->lchild,e,LR,c);
+        }
+        if(T->rchild){
+            status|=InsertNode(T->rchild,e,LR,c);
+        }
+    }
+    return status;
+}
+status DeleteNode(BiTree &T,KeyType e){
+    BiTNode *tmp,*p;
+    int status=ERROR;
+    if(T->data.key==e){
+        tmp=T;
+        if (T->lchild){ // 左子树不为空
+            p=T->lchild;
+            while (p->rchild)p=p->rchild;
+            p->rchild=T->rchild;
+            T=T->lchild;
+        }
+        else if (T->rchild){ //左子树为空
+            T=T->rchild;
+        } else{
+            T= nullptr;
+        }
+        free(tmp);
+        status=OK;
+    } else{
+        if(T->lchild){
+            status|=DeleteNode(T->lchild,e);
+        }
+        if(T->rchild){
+            status|=DeleteNode(T->rchild,e);
+        }
+    }
+    return status;
+}
 status PreOrderTraverse(BiTree T,void (*visit)(BiTree))
 //先序遍历二叉树T
 {
@@ -173,16 +249,40 @@ status LevelOrderTraverse(BiTree T,void (*visit)(BiTree))
     return OK;
 }
 
-// status SaveBiTree(BiTree T, char FileName[])
-// //将二叉树的结点数据写入到文件FileName中
-// {
-//
-// }
-// status LoadBiTree(BiTree &T,  char FileName[])
-// //读入文件FileName的结点数据，创建二叉树
-// {
-//
-// }
+status save(BiTree T,FILE *fw){
+    TElemType empty={0, "null"};
+    if(T){
+        fwrite(&T->data, sizeof(TElemType),1,fw);
+        save(T->lchild,fw);
+        save(T->rchild,fw);
+        return OK;
+    }
+    else {
+        fwrite(&empty, sizeof(TElemType), 1, fw);
+        return OK;
+    }
+}
+status SaveBiTree(BiTree T, char FileName[]){
+    FILE*fw= fopen(FileName,"wb");
+    if(!fw)return ERROR;
+    save(T,fw);
+    fclose(fw);
+    return OK;
+}
+status LoadBiTree(BiTree &T,  char FileName[])
+//读入文件FileName的结点数据，创建二叉树
+{
+    FILE *fr= fopen(FileName,"rb");
+    if(!fr)return ERROR;
+    TElemType D[10000];
+    int i = 0;
+    for (; fread(D+i, sizeof(TElemType),1,fr); i++);
+    fclose(fr);
+    D[i]={-1,"null"};
+    z=0;
+    CreateBiTree(T,D);
+    return OK;
+}
 int max(int a,int b){
     return a>b?a:b;
 }
