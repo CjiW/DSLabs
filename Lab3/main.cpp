@@ -1,5 +1,6 @@
 #include <iostream>
 #include <malloc.h>
+#include <cstring>
 
 #define TRUE 1
 #define FALSE 0
@@ -12,12 +13,21 @@ typedef int KeyType;
 typedef struct {
     KeyType  key;
     char others[20];
-} TElemType; //äºŒå‰æ ‘ç»“ç‚¹ç±»å‹å®šä¹‰
-typedef struct BiTNode{    //äºŒå‰é“¾è¡¨ç»“ç‚¹çš„å®šä¹‰  
+} TElemType; //¶ş²æÊ÷½áµãÀàĞÍ¶¨Òå
+typedef struct BiTNode{    //¶ş²æÁ´±í½áµãµÄ¶¨Òå  
     TElemType data;
     struct BiTNode *lchild,*rchild;
 } BiTNode, *BiTree;
 int z=0;
+typedef struct {  //ÏßĞÔ±íµÄ¼¯ºÏÀàĞÍ¶¨Òå
+    struct {
+        char name[30];
+        BiTree T;
+    } elem[10];
+    int length;
+} BiTrees;
+BiTrees Trees;      //ÏßĞÔ±í¼¯ºÏµÄ¶¨ÒåLists
+int usingBiTree = 0;
 status CreateBiTree(BiTree &T,TElemType definition[]);
 status ClearBiTree(BiTree &T);
 int BiTreeDepth(BiTree T);
@@ -36,31 +46,68 @@ void visit(BiTree T);
 status save(BiTree T,FILE *fw);
 int max(int a,int b);
 int main() {
-    TElemType D[]={
-            {1, "a"},
-            {2, "b"},
-            {0, "null"},
-            {6, "f"},
-            {0, "null"},
-            {0, "null"},
-            {3, "c"},
-            {4, "d"},
-            {0, "null"},
-            {0, "null"},
-            {5, "e"},
-            {0, "null"},
-            {0, "null"},
-            {-1, "null"}
-    };
-    BiTree T=nullptr;
-    CreateBiTree(T,D);
-    PreOrderTraverse(T,visit);
-    putchar('\n');
-    char fn[]="./a";
-    ClearBiTree(T);
-    LoadBiTree(T,fn);
-    PreOrderTraverse(T,visit);
-    printf("\n%d", BiTreeDepth(T));
+    int op=1,tmp;
+    TElemType e,d[1000];
+    char filename[100],s[30];
+    for (auto &i: Trees.elem) {
+        i.T = nullptr;
+    }
+    Trees.length = 1;
+    strcpy(Trees.elem[usingBiTree].name, "Default");
+    while(op) {
+        system("cls");
+        printf("\n\n");
+        printf("    ¨X¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨[\n");
+        printf("    ¨U                     %d-%-10s                     ¨U\n", usingBiTree, Trees.elem[usingBiTree].name);
+        printf("    ¨c©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤©¤¨f\n");
+        printf("    ¨U       1.  CreateBiTree      2.  DestroyBiTree        ¨U\n");
+        printf("    ¨U       3.  ClearBiTree       4.  BiTreeEmpty          ¨U\n");
+        printf("    ¨U       5.  BiTreeDepth       6.  LocateNode           ¨U\n");
+        printf("    ¨U       7.  Assign            8.  GetSibling           ¨U\n");
+        printf("    ¨U       9.  InsertNode        10. DeleteNode           ¨U\n");
+        printf("    ¨U       11. PreOrderTraverse  12. InOrderTraverse      ¨U\n");
+        printf("    ¨U       13. PostOrderTraverse 14. LevelOrderTraverse   ¨U\n");
+        printf("    ¨U       15. MaxPathSum        16. LowestCommonAncestor ¨U\n");
+        printf("    ¨U       17. InvertTree        18. SaveBiTree           ¨U\n");
+        printf("    ¨U       19. LoadBiTree        20. AddTree              ¨U\n");
+        printf("    ¨U       21. RemoveTree        22. ChangeTree           ¨U\n");
+        printf("    ¨U       23. LocateTree        0.  Exit                 ¨U\n");
+        printf("    ¨^¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨a\n");
+        printf("    ÇëÑ¡ÔñÄãµÄ²Ù×÷[0~20]:");
+        scanf_s("%d", &op);
+        switch (op) {
+            case 1:
+                tmp=0;
+                printf("ÇëÊäÈë´ø¿ÕÖ¦µÄÏÈĞòĞòÁĞ:\n");
+                while (scanf("%d %s",&d[tmp].key,d[tmp].others),d[tmp].key!=-1)tmp++;
+                switch (CreateBiTree(Trees.elem[usingBiTree].T,d)) {
+                    case OK:
+                        printf("¶ş²æÊ÷´´½¨³É¹¦£¡\n");break;
+                    case ERROR:
+                        printf("´æÔÚÖØ¸´¹Ø¼ü×Ö£¡\n");break;
+                    case INFEASIBLE:
+                        printf("¶ş²æÊ÷ÒÑ´æÔÚ£¡\n");break;
+                }
+                getchar();getchar();
+                break;
+            case 14:
+                switch (LevelOrderTraverse(Trees.elem[usingBiTree].T, visit)) {
+                    case OVERFLOW:
+                        printf("\n±éÀúÊ§°Ü£¡\n");break;
+                    case INFEASIBLE:
+                        printf("Ê÷Îª¿Õ£¡\n");break;
+                    case OK:
+                        printf("\n±éÀú³É¹¦£¡\n");break;
+                }
+                getchar();getchar();
+                break;
+            case 0:
+                break;
+        }
+    }
+    printf("»¶Ó­ÏÂ´ÎÔÙÊ¹ÓÃ±¾ÏµÍ³£¡\n");
+    getchar();
+    getchar();
     return 0;
 }
 void visit(BiTree T){
@@ -124,10 +171,10 @@ BiTNode* GetSibling(BiTree T,KeyType e){
     return nullptr;
 }
 status InsertNode(BiTree &T,KeyType e,int LR,TElemType c)
-// eæ˜¯å’ŒTä¸­ç»“ç‚¹å…³é”®å­—ç±»å‹ç›¸åŒçš„ç»™å®šå€¼ï¼ŒLRä¸º0æˆ–1ï¼Œcæ˜¯å¾…æ’å…¥ç»“ç‚¹ï¼›
-// æ ¹æ®LRä¸º0æˆ–è€…1ï¼Œæ’å…¥ç»“ç‚¹cåˆ°Tä¸­ï¼Œä½œä¸ºå…³é”®å­—ä¸ºeçš„ç»“ç‚¹çš„å·¦æˆ–å³å­©å­ç»“ç‚¹ï¼Œç»“ç‚¹eçš„åŸæœ‰å·¦å­æ ‘æˆ–å³å­æ ‘åˆ™ä¸ºç»“ç‚¹cçš„å³å­æ ‘ï¼Œè¿”å›OKã€‚
-// å¦‚æœæ’å…¥å¤±è´¥ï¼Œè¿”å›ERRORã€‚
-// ç‰¹åˆ«åœ°ï¼Œå½“LRä¸º-1æ—¶ï¼Œä½œä¸ºæ ¹ç»“ç‚¹æ’å…¥ï¼ŒåŸæ ¹ç»“ç‚¹ä½œä¸ºcçš„å³å­æ ‘ã€‚
+// eÊÇºÍTÖĞ½áµã¹Ø¼ü×ÖÀàĞÍÏàÍ¬µÄ¸ø¶¨Öµ£¬LRÎª0»ò1£¬cÊÇ´ı²åÈë½áµã£»
+// ¸ù¾İLRÎª0»òÕß1£¬²åÈë½áµãcµ½TÖĞ£¬×÷Îª¹Ø¼ü×ÖÎªeµÄ½áµãµÄ×ó»òÓÒº¢×Ó½áµã£¬½áµãeµÄÔ­ÓĞ×ó×ÓÊ÷»òÓÒ×ÓÊ÷ÔòÎª½áµãcµÄÓÒ×ÓÊ÷£¬·µ»ØOK¡£
+// Èç¹û²åÈëÊ§°Ü£¬·µ»ØERROR¡£
+// ÌØ±ğµØ£¬µ±LRÎª-1Ê±£¬×÷Îª¸ù½áµã²åÈë£¬Ô­¸ù½áµã×÷ÎªcµÄÓÒ×ÓÊ÷¡£
 {
     if(LocateNode(T,c.key))return ERROR;
     auto *tmp=(BiTNode*) malloc(sizeof(BiTNode));
@@ -167,13 +214,13 @@ status DeleteNode(BiTree &T,KeyType e){
     int status=ERROR;
     if(T->data.key==e){
         tmp=T;
-        if (T->lchild){ // å·¦å­æ ‘ä¸ä¸ºç©º
+        if (T->lchild){ // ×ó×ÓÊ÷²»Îª¿Õ
             p=T->lchild;
             while (p->rchild)p=p->rchild;
             p->rchild=T->rchild;
             T=T->lchild;
         }
-        else if (T->rchild){ //å·¦å­æ ‘ä¸ºç©º
+        else if (T->rchild){ //×ó×ÓÊ÷Îª¿Õ
             T=T->rchild;
         } else{
             T= nullptr;
@@ -191,7 +238,7 @@ status DeleteNode(BiTree &T,KeyType e){
     return status;
 }
 status PreOrderTraverse(BiTree T,void (*visit)(BiTree))
-//å…ˆåºéå†äºŒå‰æ ‘T
+//ÏÈĞò±éÀú¶ş²æÊ÷T
 {
     if(!T)return OK;
     visit(T);
@@ -200,7 +247,7 @@ status PreOrderTraverse(BiTree T,void (*visit)(BiTree))
     return OK;
 }
 status InOrderTraverse(BiTree T,void (*visit)(BiTree))
-//ä¸­åºéå†äºŒå‰æ ‘T
+//ÖĞĞò±éÀú¶ş²æÊ÷T
 {
     BiTNode *tmp[100];int top=-1;
     auto p=T;
@@ -217,7 +264,7 @@ status InOrderTraverse(BiTree T,void (*visit)(BiTree))
     return OK;
 }
 status PostOrderTraverse(BiTree T,void (*visit)(BiTree))
-//ååºéå†äºŒå‰æ ‘T
+//ºóĞò±éÀú¶ş²æÊ÷T
 {
     if(!T)return OK;
     PostOrderTraverse(T->lchild,visit);
@@ -225,13 +272,12 @@ status PostOrderTraverse(BiTree T,void (*visit)(BiTree))
     visit(T);
     return OK;
 }
-status LevelOrderTraverse(BiTree T,void (*visit)(BiTree))
-//æŒ‰å±‚éå†äºŒå‰æ ‘T
-{
-    // é˜Ÿç©º - h==t; é˜Ÿæ»¡ - h-t==1
+status LevelOrderTraverse(BiTree T,void (*visit)(BiTree)){
+    if (!T)return INFEASIBLE;
+    // ¶Ó¿Õ - h==t; ¶ÓÂú - h-t==1
     BiTNode *tmp[10000];int h=0,t=0;
     tmp[t++]=T;
-    while (h!=t){ // é˜Ÿä¸ç©º
+    while (h!=t){ // ¶Ó²»¿Õ
         int x=t;
         for (int i = h; i < x; i++) {
             if(tmp[h]->lchild){
@@ -242,7 +288,7 @@ status LevelOrderTraverse(BiTree T,void (*visit)(BiTree))
                 if (h-t==1)return OVERFLOW;
                 tmp[t++]=tmp[h]->rchild;
             }
-            visit(tmp[h++]); //å‡ºé˜Ÿ
+            visit(tmp[h++]); //³ö¶Ó
         }
     }
 
@@ -270,7 +316,7 @@ status SaveBiTree(BiTree T, char FileName[]){
     return OK;
 }
 status LoadBiTree(BiTree &T,  char FileName[])
-//è¯»å…¥æ–‡ä»¶FileNameçš„ç»“ç‚¹æ•°æ®ï¼Œåˆ›å»ºäºŒå‰æ ‘
+//¶ÁÈëÎÄ¼şFileNameµÄ½áµãÊı¾İ£¬´´½¨¶ş²æÊ÷
 {
     FILE *fr= fopen(FileName,"rb");
     if(!fr)return ERROR;
