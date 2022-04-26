@@ -40,6 +40,8 @@ typedef struct {  //线性表的集合类型定义
 GRAPHS Graphs;      //线性表集合的定义Lists
 int usingGraph = 0;
 status CreateCraph(ALGraph &G,VertexType V[],KeyType VR[][2]);
+status DestroyGraph(ALGraph &G);
+int LocateVex(ALGraph G,KeyType u);
 int main() {
     ALGraph G;
     KeyType VR[][2]={-1,-1};
@@ -50,26 +52,22 @@ int main() {
     CreateCraph(G,V,VR);
     return 0;
 }
-status CreateCraph(ALGraph &G,VertexType V[],KeyType VR[][2])
-/*根据V和VR构造图T并返回OK，如果V和VR不正确，返回ERROR
-如果有相同的关键字，返回ERROR。此题允许通过增加其它函数辅助实现本关任务*/
-{
+status CreateCraph(ALGraph &G,VertexType V[],KeyType VR[][2]){
     // V 重复？
-    int val[1000]={0};
-    for (int i = 0; V[i].key != -1; i++) {
-        if(val[V[i].key])return ERROR;
+    int val[1000]={0},i = 0;
+    for (; V[i].key != -1; i++) {
+        if(i>=MAX_VERTEX_NUM||val[V[i].key])return ERROR;// 结点太多？
         val[V[i].key]=1;
     }
+    if(!i)return ERROR;// 空？
     // copy 顶点
-    int i = 0;
-    for (; V[i].key!=-1; i++) {
+    for (i = 0; V[i].key!=-1; i++) {
         G.vertices[i].data=V[i];
         G.vertices[i].firstarc=nullptr;
     }
     G.vexnum = i;
     // 加边，头插
-    i = 0;
-    for (; VR[i][0]!=-1; i++) {
+    for (i = 0; VR[i][0]!=-1; i++) {
         int v,w;
         for (v = 0; v <= G.vexnum; v++)if(v==G.vexnum||G.vertices[v].data.key==VR[i][0])break;
         if(v==G.vexnum)return ERROR;// 找到 v ?
@@ -78,7 +76,7 @@ status CreateCraph(ALGraph &G,VertexType V[],KeyType VR[][2])
         for (ArcNode *p = G.vertices[v].firstarc; p ; p=p->nextarc) {
             if(p->adjvex==w)return ERROR;// 重边？
         }
-        auto *newArc=(ArcNode*)malloc(sizeof(ArcNode));// 过去
+        auto newArc=(ArcNode*)malloc(sizeof(ArcNode));// 过去
         if(!newArc)return OVERFLOW;
         newArc->adjvex=w;
         newArc->nextarc=G.vertices[v].firstarc;
@@ -90,5 +88,24 @@ status CreateCraph(ALGraph &G,VertexType V[],KeyType VR[][2])
         G.vertices[w].firstarc=newArc;
     }
     G.arcnum = i;
+    G.kind=UDG;
     return OK;
+}
+status DestroyGraph(ALGraph &G){
+    if(!G.vexnum)return INFEASIBLE;
+    for (int i = 0; i < G.vexnum; i++) {
+        auto p=G.vertices[i].firstarc,q=p;
+        while (p){
+            q=p->nextarc;
+            free(p);
+            p=q;
+        }
+    }
+    G.vexnum=G.arcnum=0;
+    return OK;
+}
+int LocateVex(ALGraph G,KeyType u)
+//根据u在图G中查找顶点，查找成功返回位序，否则返回-1；
+{
+
 }
