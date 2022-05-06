@@ -38,184 +38,32 @@ typedef struct {  //线性表的集合类型定义
 LISTS Lists;      //线性表集合的定义Lists
 int usingList = 0;
 
-/*
- * Function:        InitList
- * Description:     初始化顺序表
- * Calls:           malloc
- * Input:
- *  - SqList &L     顺序表的引用
- * Return:
- *  - status        OK|INFEASIBLE|OVERFLOW
- * Output:          None
- */
 status InitList(SqList &L);
 
-/*
- * Function:        DestroyList
- * Description:     销毁顺序表
- * Calls:           free
- * Input:
- *  - SqList &L     顺序表的引用
- * Return:
- *  - status        OK|INFEASIBLE
- * Output:          None
- */
 status DestroyList(SqList &L);
 
-/*
- * Function:        ClearList
- * Description:     清空顺序表
- * Calls:           None
- * Input:
- *  - SqList &L     顺序表的引用
- * Return:
- *  - status        OK|INFEASIBLE
- * Output:          None
- */
 status ClearList(SqList &L);
 
-/*
- * Function:        ListEmpty
- * Description:     顺序表判空
- * Calls:           None
- * Input:
- *  - SqList L      顺序表
- * Return:
- *  - status        TRUE|FALSE|INFEASIBLE
- * Output:          None
- */
 status ListEmpty(SqList L);
 
-/*
- * Function:        ListLength
- * Description:     获取顺序表长度
- * Calls:           None
- * Input:
- *  - SqList L      顺序表
- * Return:
- *  - int           长度|INFEASIBLE
- * Output:          None
- */
 int ListLength(SqList L);
 
-/*
- * Function:        GetElem
- * Description:     获取顺序表特定位置元素
- * Calls:           None
- * Input:
- *  - SqList L      顺序表
- *  - int i         指定位置
- *  - ElemType &e   返回元素的引用
- * Return:
- *  - status        OK|ERROR|INFEASIBLE
- * Output:          None
- */
 status GetElem(SqList L, int i, ElemType &e);
 
-/*
- * Function:        LocateElem
- * Description:     获取顺序表中元素位置
- * Calls:           None
- * Input:
- *  - SqList L      顺序表
- *  - ElemType e    指定元素
- * Return:
- *  - int           位置|ERROR|INFEASIBLE
- * Output:          None
- */
 int LocateElem(SqList L, ElemType e); //简化过
-/*
- * Function:         PriorElem
- * Description:      获取顺序表元素的前驱
- * Calls:            None
- * Input:
- *  - SqList L       顺序表
- *  - ElemType cur   当前元素
- *  - ElemType&pre_e 前驱元素的引用
- * Return:
- *  - status         OK|ERROR|INFEASIBLE
- * Output:           None
- */
+
 status PriorElem(SqList L, ElemType cur, ElemType &pre_e);
 
-/*
- * Function:          NextElem
- * Description:       获取顺序表元素的后继
- * Calls:             None
- * Input:
- *  - SqList L        顺序表
- *  - ElemType cur    当前元素
- *  - ElemType&next_e 后继元素的引用
- * Return:
- *  - status          OK|ERROR|INFEASIBLE
- * Output:            None
- */
 status NextElem(SqList L, ElemType cur, ElemType &next_e);
 
-/*
- * Function:        ListInsert
- * Description:     插入元素到指定位置
- * Calls:           realloc
- * Input:
- *  - SqList &L     顺序表引用
- *  - int i         插入位置
- *  - ElemType e    插入元素
- * Return:
- *  - status        OK|ERROR|INFEASIBLE|OVERFLOW
- * Output:          None
- */
 status ListInsert(SqList &L, int i, ElemType e);
 
-/*
- * Function:        ListDelete
- * Description:     删除特定位置元素
- * Calls:           None
- * Input:
- *  - SqList &L     顺序表引用
- *  - int i         指定位置
- *  - ElemType &e   删除元素的引用
- * Return:
- *  - status        OK|ERROR|INFEASIBLE
- * Output:          None
- */
 status ListDelete(SqList &L, int i, ElemType &e);
 
-/*
- * Function:        ListTraverse
- * Description:     遍历并打印顺序表
- * Calls:           printf
- * Input:
- *  - SqList L      顺序表
- * Return:
- *  - status        OK|INFEASIBLE
- * Output:          顺序表元素，以空格分隔
- */
 status ListTraverse(SqList L);
 
-/*
- * Function:          SaveList
- * Description:       存储顺序表
- * Calls:             fopen, fwrite, fclose
- * Input:
- *  - SqList L        顺序表
- *  - char FileName[] 文件路径
- * Return:
- *  - status          OK|ERROR|INFEASIBLE
- * Output:            None
- */
 status SaveList(SqList L, char FileName[]);
 
-/*
- * Function:          LoadList
- * Description:       加载顺序表
- * Calls:             fopen, fread, fclose, ListInsert
- * Input:
- *  - SqList &L       顺序表引用
- *  - char FileName[] 文件路径
- * Return:
- *  - status          OK|ERROR|OVERFLOW|INFEASIBLE
- * Output:            None
- */
 status LoadList(SqList &L, char FileName[]);
 
 int MaxSubArray(SqList L);
