@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="CPP_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/Lab1/cmake-build-debug/CMakeFiles/3.21.1/CompilerIdC/tmp" />
+      <excludeFolder url="file://$MODULE_DIR$/Lab1/cmake-build-debug/CMakeFiles/3.21.1/CompilerIdCXX/tmp" />
+      <excludeFolder url="file://$MODULE_DIR$/Lab1/cmake-build-debug/CMakeFiles/CMakeTmp" />
+      <excludeFolder url="file://$MODULE_DIR$/Lab1/cmake-build-debug/CMakeFiles/Lab2.dir" />
+      <excludeFolder url="file://$MODULE_DIR$/Lab1/cmake-build-debug/CMakeFiles/test.dir" />
+      <excludeFolder url="file://$MODULE_DIR$/Lab2/cmake-build-debug/CMakeFiles/3.21.1/CompilerIdC/tmp" />
+      <excludeFolder url="file://$MODULE_DIR$/Lab2/cmake-build-debug/CMakeFiles/3.21.1/CompilerIdCXX/tmp" />
+      <excludeFolder url="file://$MODULE_DIR$/Lab2/cmake-build-debug/CMakeFiles/CMakeTmp" />
+      <excludeFolder url="file://$MODULE_DIR$/Lab2/cmake-build-debug/CMakeFiles/Lab2.dir" />
+      <excludeFolder url="file://$MODULE_DIR$/Lab2/cmake-build-debug/CMakeFiles/3.22.3" />
+      <excludeFolder url="file://$MODULE_DIR$/Lab3/.idea" />
+      <excludeFolder url="file://$MODULE_DIR$/Lab3/cmake-build-debug" />
+      <excludeFolder url="file://$MODULE_DIR$/Lab4/.idea" />
+      <excludeFolder url="file://$MODULE_DIR$/Lab4/cmake-build-debug" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>

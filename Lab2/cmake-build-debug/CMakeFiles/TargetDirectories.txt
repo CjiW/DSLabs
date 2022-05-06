@@ -1,3 +1,0 @@
-C:/Users/cjw/work/C/DSLabs/Lab2/cmake-build-debug/CMakeFiles/Lab2.dir
-C:/Users/cjw/work/C/DSLabs/Lab2/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/cjw/work/C/DSLabs/Lab2/cmake-build-debug/CMakeFiles/rebuild_cache.dir
