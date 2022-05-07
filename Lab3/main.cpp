@@ -27,11 +27,13 @@ typedef struct {  //线性表的集合类型定义
     int length;
 } BiTrees;
 BiTrees Trees;      //线性表集合的定义Lists
-int usingBiTree = 0;
+int usingBiTree = 0,flag=OK;
 
 status CreateBiTree(BiTree &T, TElemType definition[]);
 
 status ClearBiTree(BiTree &T);
+
+bool BiTreeEmpty(BiTree T);
 
 int BiTreeDepth(BiTree T);
 
@@ -67,6 +69,7 @@ int main() {
     int op = 1, tmp;
     KeyType k;
     TElemType e, d[1000];
+    BiTNode *node;
     char filename[100], s[30];
     for (auto &i: Trees.elem) {
         i.T = nullptr;
@@ -97,7 +100,7 @@ int main() {
         switch (op) {
             case 1:
                 tmp = 0;
-                printf("请输入带空枝的先序序列:\n");
+                printf("请输入带空枝的先序序列【key others】:\n");
                 while (scanf("%d %s", &d[tmp].key, d[tmp].others), d[tmp].key != -1)tmp++;
                 switch (CreateBiTree(Trees.elem[usingBiTree].T, d)) {
                     case OK:
@@ -109,38 +112,79 @@ int main() {
                     case INFEASIBLE:
                         printf("二叉树已存在！\n");
                         break;
+                    case OVERFLOW:
+                        printf("内存分配失败！\n");
+                        break;
                 }
                 getchar();
                 getchar();
                 break;
             case 2:
-                //ClearBiTree()
+                switch (ClearBiTree(Trees.elem[usingBiTree].T)) {
+                    case OK:
+                        printf("二叉树清空成功！\n");
+                        break;
+                    case INFEASIBLE:
+                        printf("二叉树为空！\n");
+                }
                 getchar();
                 getchar();
                 break;
             case 3:
-                //TODO:BiTreeEmpty
+                if (BiTreeEmpty(Trees.elem[usingBiTree].T)){
+                    printf("二叉树为空。\n");
+                } else{
+                    printf("二叉树不空。\n");
+                }
                 getchar();
                 getchar();
                 break;
             case 4:
-                //BiTreeDepth()
                 printf("二叉树的深度为%d。\n", BiTreeDepth(Trees.elem[usingBiTree].T));
                 getchar();
                 getchar();
                 break;
             case 5:
-                //LocateNode()
+                printf("请输入目标结点关键字:\n");
+                scanf("%d",&k);
+                node=LocateNode(Trees.elem[usingBiTree].T,k);
+                if(!node){
+                    printf("未找到结点！\n");
+                } else{
+                    printf("结点为【%d %s】。\n",node->data.key,node->data.others);
+                }
                 getchar();
                 getchar();
                 break;
             case 6:
-                //Assign()
+                printf("请输入要赋值结点的关键字:\n");
+                scanf("%d",&k);
+                printf("请输入【key others】:\n");
+                scanf("%d %s",&e.key,e.others);
+                switch (Assign(Trees.elem[usingBiTree].T, k, e)) {
+                    case INFEASIBLE:
+                        printf("未找到目标节点！\n");
+                        break;
+                    case ERROR:
+                        printf("存在重复关键字！\n");
+                        break;
+                    case OK:
+                        printf("赋值成功！\n变更为【%d-%s】\n",e.key,e.others);
+                        break;
+                }
                 getchar();
                 getchar();
                 break;
             case 7:
                 //GetSibling()
+                printf("请输入key:\n");
+                scanf("%d",&k);
+                node=GetSibling(Trees.elem[usingBiTree].T, k);
+                if(!node){
+                    printf("未找到其兄弟结点！\n");
+                } else{
+                    printf("兄弟结点为【%d %s】\n",node->data.key,node->data.others);
+                }
                 getchar();
                 getchar();
                 break;
@@ -148,12 +192,20 @@ int main() {
                 //InsertNode()
                 printf("请输入目标结点关键字:\n");
                 scanf("%d", &k);
-                printf("请输入插入选项【0|1|2】:\n");
+                printf("请输入插入选项【-1|0|1】:\n");
                 scanf("%d", &tmp);
-                printf("请输入插入结点:\n");
+                printf("请输入插入结点【key others】:\n");
                 scanf("%d %s", &e.key, &e.others);
                 switch (InsertNode(Trees.elem[usingBiTree].T, k, tmp, e)) {
-
+                    case INFEASIBLE:
+                        printf("存在重复关键字！\n");
+                        break;
+                    case ERROR:
+                        printf("未找到目标结点！\n");
+                        break;
+                    case OK:
+                        printf("插入【%d %s】成功！\n",e.key,e.others);
+                        break;
                 }
                 getchar();
                 getchar();
@@ -250,7 +302,7 @@ int main() {
 }
 
 void visit(BiTree T) {
-    printf("%d ", T->data.key);
+    printf("【%d-%s】", T->data.key,T->data.others);
 }
 
 status CreateBiTree(BiTree &T, TElemType definition[]) {
@@ -266,11 +318,13 @@ status CreateBiTree(BiTree &T, TElemType definition[]) {
     z++;
     if (definition[z - 1].key == 0)T = nullptr;
     else {
-        if (!(T = (BiTNode *) malloc(sizeof(BiTNode))))return OVERFLOW;
+        if (!(T = (BiTNode *) malloc(sizeof(BiTNode))))return ERROR;
         T->data = definition[z - 1];
         T->lchild = T->rchild = nullptr;
-        if (CreateBiTree(T->lchild, definition) == ERROR)return ERROR;
-        if (CreateBiTree(T->rchild, definition) == ERROR)return ERROR;
+        flag=CreateBiTree(T->lchild, definition);
+        if (flag == ERROR||flag==OVERFLOW)return flag;
+        flag=CreateBiTree(T->rchild, definition);
+        if (flag == ERROR||flag==OVERFLOW)return flag;
     }
     return OK;
 }
@@ -283,7 +337,9 @@ status ClearBiTree(BiTree &T) {
     T = nullptr;
     return OK;
 }
-
+bool BiTreeEmpty(BiTree T){
+    return T==nullptr;
+}
 int BiTreeDepth(BiTree T) {
     if (!T)return 0;
     return max(BiTreeDepth(T->lchild), BiTreeDepth(T->rchild)) + 1;
@@ -300,7 +356,8 @@ BiTNode *LocateNode(BiTree T, KeyType e) {
 status Assign(BiTree &T, KeyType e, TElemType value) {
     BiTNode *tmp1 = LocateNode(T, e), *tmp2 = nullptr;
     if (value.key != e)tmp2 = LocateNode(T, value.key);
-    if (!tmp1 || tmp2)return ERROR;
+    if (!tmp1)return INFEASIBLE;
+    if(tmp2)return ERROR;
     tmp1->data = value;
     return OK;
 }
@@ -321,7 +378,8 @@ status InsertNode(BiTree &T, KeyType e, int LR, TElemType c)
 // 如果插入失败，返回ERROR。
 // 特别地，当LR为-1时，作为根结点插入，原根结点作为c的右子树。
 {
-    if (LocateNode(T, c.key))return ERROR;
+    if (!T)return ERROR;
+    if (LocateNode(T, c.key))return INFEASIBLE;
     auto *tmp = (BiTNode *) malloc(sizeof(BiTNode));
     tmp->data = c;
     int status = ERROR;
