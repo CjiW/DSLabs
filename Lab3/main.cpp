@@ -28,6 +28,7 @@ typedef struct {  //线性表的集合类型定义
 } BiTrees;
 BiTrees Trees;      //线性表集合的定义Lists
 int usingBiTree = 0,flag=OK;
+int keys[1000];
 
 status CreateBiTree(BiTree &T, TElemType definition[]);
 
@@ -59,6 +60,18 @@ status SaveBiTree(BiTree T, char FileName[]);
 
 status LoadBiTree(BiTree &T, char FileName[]);
 
+status AddBiTree(BiTrees &TS,const char *TreeName);
+
+status DestroyBiTree(BiTrees &TS,const char *TreeName);
+
+int LocateBiTree(BiTrees TS,const char *TreeName);
+
+int MaxPathSum(BiTree T);
+
+BiTNode *LowestCommonAncestor(BiTree T,KeyType e1,KeyType e2);
+
+status InvertTree(BiTree &T);
+
 void visit(BiTree T);
 
 status save(BiTree T, FILE *fw);
@@ -67,9 +80,10 @@ int max(int a, int b);
 
 int main() {
     int op = 1, tmp;
-    KeyType k;
+    KeyType k,k1;
     TElemType e, d[1000];
     BiTNode *node;
+    memset(keys,0,sizeof keys);
     char filename[100], s[30];
     for (auto &i: Trees.elem) {
         i.T = nullptr;
@@ -116,6 +130,7 @@ int main() {
                         printf("内存分配失败！\n");
                         break;
                 }
+                memset(keys,0,sizeof keys);z=0;
                 getchar();
                 getchar();
                 break;
@@ -211,22 +226,55 @@ int main() {
                 getchar();
                 break;
             case 9:
-                //DeleteNode()
+                printf("请输入要删除结点的关键字:\n");
+                scanf("%d",&k);
+                switch (DeleteNode(Trees.elem[usingBiTree].T, k)) {
+                    case OK:
+                        printf("结点删除成功！\n");
+                        break;
+                    case ERROR:
+                        printf("未找到目标结点！\n");
+                        break;
+                }
                 getchar();
                 getchar();
                 break;
             case 10:
                 //PreOrderTraverse()
+                switch (PreOrderTraverse(Trees.elem[usingBiTree].T,visit)) {
+                    case ERROR:
+                        printf("二叉树为空！\n");
+                        break;
+                    case OK:
+                        printf("\n遍历成功！\n");
+                        break;
+                }
                 getchar();
                 getchar();
                 break;
             case 11:
                 //InOrderTraverse()
+                switch (InOrderTraverse(Trees.elem[usingBiTree].T,visit)) {
+                    case ERROR:
+                        printf("二叉树为空！\n");
+                        break;
+                    case OK:
+                        printf("\n遍历成功！\n");
+                        break;
+                }
                 getchar();
                 getchar();
                 break;
             case 12:
                 //PostOrderTraverse()
+                switch (PostOrderTraverse(Trees.elem[usingBiTree].T,visit)) {
+                    case ERROR:
+                        printf("二叉树为空！\n");
+                        break;
+                    case OK:
+                        printf("\n遍历成功！\n");
+                        break;
+                }
                 getchar();
                 getchar();
                 break;
@@ -248,46 +296,127 @@ int main() {
                 break;
             case 14:
                 //MaxPathSum
+                if (!(tmp=MaxPathSum(Trees.elem[usingBiTree].T))) {
+                    printf("二叉树为空！\n");
+                } else{
+                    printf("最大路径和为%d。\n",tmp);
+                }
                 getchar();
                 getchar();
                 break;
             case 15:
                 //LowestCommonAncestor
+                printf("请输入两结点的关键字:\n");
+                scanf("%d%d",&k,&k1);
+                node=LowestCommonAncestor(Trees.elem[usingBiTree].T,k,k1);
+                if(node!=nullptr){
+                    printf("最近公共祖先为【%d %s】\n",node->data.key,node->data.others);
+                }else{
+                    printf("两结点不都存在！\n");
+                }
                 getchar();
                 getchar();
                 break;
             case 16:
                 //InvertTree
+                switch (InvertTree(Trees.elem[usingBiTree].T)) {
+                    case ERROR:
+                        printf("二叉树为空！\n");
+                        break;
+                    case OK:
+                        printf("二叉树翻转成功！\n");
+                        break;
+                }
                 getchar();
                 getchar();
                 break;
             case 17:
                 //SaveBiTree
+                printf("请输入文件路径:\n");
+                scanf("%s",filename);
+                switch (SaveBiTree(Trees.elem[usingBiTree].T, filename)) {
+                    case ERROR:
+                        printf("二叉树保存失败！\n");
+                        break;
+                    case OK:
+                        printf("二叉树保存成功！\n");
+                        break;
+                }
                 getchar();
                 getchar();
                 break;
             case 18:
                 //LoadBiTree
+                printf("请输入文件路径:\n");
+                scanf("%s",filename);
+                switch (LoadBiTree(Trees.elem[usingBiTree].T, filename)) {
+                    case ERROR:
+                        printf("二叉树加载失败！\n");
+                        break;
+                    case INFEASIBLE:
+                        printf("二叉树已存在！\n");
+                        break;
+                    case OVERFLOW:
+                        printf("内存分配失败！\n");
+                        break;
+                    case OK:
+                        printf("二叉树加载成功！\n");
+                        break;
+                }
                 getchar();
                 getchar();
                 break;
             case 19:
                 //AddBiTree
+                printf("请输入要创建的二叉树名:\n");
+                scanf("%s", s);
+                switch (AddBiTree(Trees, s)) {
+                    case OK:
+                        printf("创建成功！\n");
+                        break;
+                    case OVERFLOW:
+                        printf("当前二叉树过多！\n");
+                        break;
+                    case ERROR:
+                        printf("二叉树已存在！\n");
+                        break;
+                }
                 getchar();
                 getchar();
                 break;
             case 20:
                 //DestroyBiTree
+                printf("请输入要销毁的树名:\n");
+                scanf("%s", s);
+                if (DestroyBiTree(Trees, s) == ERROR)printf("删除失败！\n");
+                else printf("删除成功！\n");
                 getchar();
                 getchar();
                 break;
             case 21:
                 //ChangeBiTree
+                printf("请输入要使用的二叉树名:\n");
+                scanf("%s", s);
+                tmp = LocateBiTree(Trees, s);
+                if (tmp) {
+                    usingBiTree = tmp - 1;
+                    printf("变更成功！\n当前二叉树:%d-%s\n", usingBiTree, Trees.elem[usingBiTree].name);
+                } else {
+                    printf("二叉树不存在！\n");
+                }
                 getchar();
                 getchar();
                 break;
             case 22:
                 //LocateBiTree
+                printf("请输入二叉树名:\n");
+                scanf("%s", s);
+                tmp = LocateBiTree(Trees, s);
+                if (!tmp) {
+                    printf("%s二叉树不存在！\n", s);
+                } else {
+                    printf("%s是第%d个二叉树。\n", s, tmp - 1);
+                }
                 getchar();
                 getchar();
                 break;
@@ -310,21 +439,29 @@ status CreateBiTree(BiTree &T, TElemType definition[]) {
     if (definition[z].key == -1)
         return OK;
     if (definition[z].key > 0) {
-        int i = 0;
-        while (definition[z + (++i)].key != -1) {
-            if (definition[z + i].key == definition[z].key)return ERROR;
-        }
+        if(keys[definition[z].key])return ERROR;
+        keys[definition[z].key]=1;
     }
     z++;
     if (definition[z - 1].key == 0)T = nullptr;
     else {
-        if (!(T = (BiTNode *) malloc(sizeof(BiTNode))))return ERROR;
+        if (!(T = (BiTNode *) malloc(sizeof(BiTNode)))){
+            return OVERFLOW;
+        }
         T->data = definition[z - 1];
         T->lchild = T->rchild = nullptr;
         flag=CreateBiTree(T->lchild, definition);
-        if (flag == ERROR||flag==OVERFLOW)return flag;
+        if (flag == ERROR||flag==OVERFLOW){
+            free(T);
+            T=nullptr;
+            return flag;
+        }
         flag=CreateBiTree(T->rchild, definition);
-        if (flag == ERROR||flag==OVERFLOW)return flag;
+        if (flag == ERROR||flag==OVERFLOW){
+            free(T);
+            T=nullptr;
+            return flag;
+        }
     }
     return OK;
 }
@@ -363,8 +500,8 @@ status Assign(BiTree &T, KeyType e, TElemType value) {
 }
 
 BiTNode *GetSibling(BiTree T, KeyType e) {
+    if(T->data.key==e||(!T->lchild) && (!T->rchild))return nullptr;
     BiTNode *tmp;
-    if ((!T->lchild) && (!T->rchild))return nullptr;
     if (T->lchild && T->lchild->data.key == e)return T->rchild;
     if (T->rchild && T->rchild->data.key == e)return T->lchild;
     if ((tmp = GetSibling(T->lchild, e)))return tmp;
@@ -372,12 +509,7 @@ BiTNode *GetSibling(BiTree T, KeyType e) {
     return nullptr;
 }
 
-status InsertNode(BiTree &T, KeyType e, int LR, TElemType c)
-// e是和T中结点关键字类型相同的给定值，LR为0或1，c是待插入结点；
-// 根据LR为0或者1，插入结点c到T中，作为关键字为e的结点的左或右孩子结点，结点e的原有左子树或右子树则为结点c的右子树，返回OK。
-// 如果插入失败，返回ERROR。
-// 特别地，当LR为-1时，作为根结点插入，原根结点作为c的右子树。
-{
+status InsertNode(BiTree &T, KeyType e, int LR, TElemType c){
     if (!T)return ERROR;
     if (LocateNode(T, c.key))return INFEASIBLE;
     auto *tmp = (BiTNode *) malloc(sizeof(BiTNode));
@@ -441,19 +573,16 @@ status DeleteNode(BiTree &T, KeyType e) {
     return status;
 }
 
-status PreOrderTraverse(BiTree T, void (*visit)(BiTree))
-//先序遍历二叉树T
-{
-    if (!T)return OK;
+status PreOrderTraverse(BiTree T, void (*visit)(BiTree)){
+    if (!T)return ERROR;
     visit(T);
     PreOrderTraverse(T->lchild, visit);
     PreOrderTraverse(T->rchild, visit);
     return OK;
 }
 
-status InOrderTraverse(BiTree T, void (*visit)(BiTree))
-//中序遍历二叉树T
-{
+status InOrderTraverse(BiTree T, void (*visit)(BiTree)){
+    if(!T)return ERROR;
     BiTNode *tmp[100];
     int top = -1;
     auto p = T;
@@ -470,10 +599,8 @@ status InOrderTraverse(BiTree T, void (*visit)(BiTree))
     return OK;
 }
 
-status PostOrderTraverse(BiTree T, void (*visit)(BiTree))
-//后序遍历二叉树T
-{
-    if (!T)return OK;
+status PostOrderTraverse(BiTree T, void (*visit)(BiTree)){
+    if (!T)return ERROR;
     PostOrderTraverse(T->lchild, visit);
     PostOrderTraverse(T->rchild, visit);
     visit(T);
@@ -507,12 +634,12 @@ status LevelOrderTraverse(BiTree T, void (*visit)(BiTree)) {
 status save(BiTree T, FILE *fw) {
     TElemType empty = {0, "null"};
     if (T) {
-        fwrite(&T->data, sizeof(TElemType), 1, fw);
-        save(T->lchild, fw);
-        save(T->rchild, fw);
+        if(!fwrite(&T->data, sizeof(TElemType), 1, fw))return ERROR;
+        if(save(T->lchild, fw)==ERROR)return ERROR;
+        if(save(T->rchild, fw)==ERROR)return ERROR;
         return OK;
     } else {
-        fwrite(&empty, sizeof(TElemType), 1, fw);
+        if(!fwrite(&empty, sizeof(TElemType), 1, fw))return ERROR;
         return OK;
     }
 }
@@ -520,14 +647,12 @@ status save(BiTree T, FILE *fw) {
 status SaveBiTree(BiTree T, char FileName[]) {
     FILE *fw = fopen(FileName, "wb");
     if (!fw)return ERROR;
-    save(T, fw);
+    if(save(T, fw)==ERROR)return ERROR;
     fclose(fw);
     return OK;
 }
 
-status LoadBiTree(BiTree &T, char FileName[])
-//读入文件FileName的结点数据，创建二叉树
-{
+status LoadBiTree(BiTree &T, char FileName[]){
     FILE *fr = fopen(FileName, "rb");
     if (!fr)return ERROR;
     TElemType D[10000];
@@ -536,9 +661,80 @@ status LoadBiTree(BiTree &T, char FileName[])
     fclose(fr);
     D[i] = {-1, "null"};
     z = 0;
-    CreateBiTree(T, D);
+    return CreateBiTree(T, D);
+}
+
+status AddBiTree(BiTrees &TS, const char *TreeName) {
+    if (TS.length >= 10)return OVERFLOW;
+    if (LocateBiTree(TS, TreeName)) return ERROR;
+    int i = 0;
+    while ((TS.elem[TS.length].name[i] = TreeName[i]))i++;
+    TS.elem[TS.length].T = nullptr;
+    TS.length++;
     return OK;
 }
+
+status DestroyBiTree(BiTrees &TS, const char *TreeName) {
+    int i = LocateBiTree(TS, TreeName);
+    if (!i)
+        return INFEASIBLE;
+    if (i == usingBiTree + 1)
+        return ERROR;
+    i--;
+    if (usingBiTree >= i)usingBiTree--;
+    ClearBiTree(TS.elem[i].T);
+    for (; i < TS.length; i++) {
+        int j = 0;
+        while ((TS.elem[i].name[j] = TS.elem[i + 1].name[j]))j++;
+        TS.elem[i].T = TS.elem[i + 1].T;
+    }
+    TS.length--;
+    return OK;
+
+}
+
+int LocateBiTree(BiTrees TS, const char *TreeName) {
+    for (int i = 0; i < TS.length; i++) {
+        if (strcmp(TS.elem[i].name, TreeName) != 0)continue;
+        return i + 1;
+    }
+    return 0;
+}
+
+int MaxPathSum(BiTree T){
+    if (!T)return 0;
+    return T->data.key+ max(MaxPathSum(T->lchild),MaxPathSum(T->rchild));
+}
+
+bool DFS(BiTree T,KeyType e1,KeyType e2,BiTNode *&N){
+    if (!T)return false;
+    bool f1= DFS(T->lchild,e1,e2,N),f2=DFS(T->rchild,e1,e2,N);
+    if((f1&&f2)||((f1||f2)&&(T->data.key==e1||T->data.key==e2))){
+        N=T;
+    }
+    if(f1||f2||(T->data.key==e1||T->data.key==e2)){
+        return true;
+    }
+    return false;
+}
+
+BiTNode *LowestCommonAncestor(BiTree T,KeyType e1,KeyType e2){
+    BiTNode *N=nullptr;
+    DFS(T,e1,e2,N);
+    return N;
+
+}
+
+status InvertTree(BiTree &T){
+    if(!T)return ERROR;
+    BiTree TT=T->rchild;
+    T->rchild=T->lchild;
+    T->lchild=TT;
+    InvertTree(T->lchild);
+    InvertTree(T->rchild);
+    return OK;
+}
+
 
 int max(int a, int b) {
     return a > b ? a : b;
