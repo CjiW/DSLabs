@@ -380,7 +380,24 @@ status BFSTraverse(ALGraph &G,void (*visit)(VertexType)){
     return OK;
 }
 status SaveGraph(ALGraph G, char FileName[]){
-
+    FILE *fw= fopen(FileName,"wb");
+    fwrite(&G.kind,sizeof G.kind,1,fw);
+    fwrite(&G.vexnum,sizeof(int),1,fw);
+    fwrite(&G.arcnum,sizeof(int),1,fw);
+    for (int i = 0; i < G.vexnum; ++i) {
+        fwrite(&G.vertices[i].data, sizeof(VertexType),1,fw);
+    }
+    for (int i = 0; i < G.vexnum; ++i) {
+        auto tmp=G.vertices[i].firstarc;
+        while (tmp){
+            if(G.vertices[tmp->adjvex].data.key>G.vertices[i].data.key){
+                fwrite(&i, sizeof(int),1,fw);
+                fwrite(&G.vertices[tmp->adjvex].data.key, sizeof(int),1,fw);
+            }
+            tmp=tmp->nextarc;
+        }
+    }
+    return OK;
 }
 status LoadGraph(ALGraph &G, char FileName[]){
 

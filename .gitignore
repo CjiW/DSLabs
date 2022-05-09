@@ -1,9 +1,13 @@
 /.idea/
 /Lab1/.idea/
 /Lab1/cmake-build-debug/
+/Lab1/cmake-build-release/
 /Lab2/.idea/
 /Lab2/cmake-build-debug/
+/Lab2/cmake-build-release/
 /Lab3/.idea/
 /Lab3/cmake-build-debug/
+/Lab3/cmake-build-release/
 /Lab4/.idea/
 /Lab4/cmake-build-debug/
+/Lab4/cmake-build-release/
