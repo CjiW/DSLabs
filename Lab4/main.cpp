@@ -9,6 +9,7 @@ using namespace std;
 #define ERROR 0
 #define INFEASIBLE -1
 #define OVERFLOW -2
+#define EMPTY -4
 #define MAX_VERTEX_NUM 20
 typedef int status;
 typedef int KeyType;
@@ -43,7 +44,6 @@ typedef struct {  //线性表的集合类型定义
 GRAPHS Graphs;      //线性表集合的定义Lists
 int usingGraph = 0;
 bool vis[MAX_VERTEX_NUM];
-void (*visitFunc)(VertexType);
 status CreateGraph(ALGraph &G, VertexType V[], KeyType VR[][3]);
 
 status DestroyGraph(ALGraph &G);
@@ -55,6 +55,8 @@ status PutVex(ALGraph &G, KeyType u, VertexType value);
 int FirstAdjVex(ALGraph G, KeyType u);
 
 int NextAdjVex(ALGraph G, KeyType v, KeyType w);
+
+status InsertVex(ALGraph &G, VertexType v);
 
 status DeleteVex(ALGraph &G, KeyType v);
 
@@ -73,22 +75,32 @@ status SaveGraph(ALGraph G, char FileName[]);
 status LoadGraph(ALGraph &G, char FileName[]);
 
 //（1）距离小于k的顶点集合：函数名称是VerticesSetLessThanK(G,v,k)，初始条件是图G存在；操作结果是返回与顶点v距离小于k的顶点集合；
+void LTK_DFS(ALGraph G,int dis,int V_idx,int k);
+
 status VerticesSetLessThanK(ALGraph G,KeyType v,int k);
 //（2）顶点间最短路径和长度：函数名称是ShortestPathLength(G,v,w); 初始条件是图G存在；操作结果是返回顶点v与顶点w的最短路径的长度；
 int ShortestPathLength(ALGraph G,KeyType v,KeyType w);
 //（3）图的连通分量：函数名称是ConnectedComponentsNums(G)，初始条件是图G存在；操作结果是返回图G的所有连通分量的个数；
+void CC_DFS(ALGraph G,int v);
+
 int ConnectedComponentsNums(ALGraph G);
 
-void (*Emp)(VertexType){};
+int LocateGraph(GRAPHS graphs, const char GraphName[]);
+
+status AddGraph(GRAPHS &graphs,const char GraphName[]);
+
+status RemoveGraph(GRAPHS &graphs, char ListName[]);
 
 int min(int a,int b){
-
+    if(a<0)a=INT_MAX;
+    if(b<0)b=INT_MAX;
+    return a<b?a:b;
 }
 
 int main() {
     int op = 1, tmp;
-    VertexType v,*V;
-    KeyType k;
+    VertexType v,V[30];
+    KeyType j,k;
     KeyType A[30][3];
     char filename[128], s[30];
     for (auto &i: Graphs.elem) {
@@ -102,37 +114,36 @@ int main() {
         printf("\n\n");
         // ╔ ═ ╗ ║ ╚ ╝
         printf("    ╔═══════════════════════════════════════════════════════╗\n");
-        printf("    ║               %d-%-10s                         ║\n", usingGraph, Graphs.elem[usingGraph].name);
+        printf("    ║                  %d-%-10s                         ║\n", usingGraph, Graphs.elem[usingGraph].name);
         printf("    ╟───────────────────────────────────────────────────────╢\n");
-        printf("    ║     1. CreateGraph         2. DestroyGraph            ║\n");
-        printf("    ║     3. LocateVex           4. PutVex                  ║\n");
-        printf("    ║     5. FirstAdjVex         6. NextAdjVex              ║\n");
-        printf("    ║     7. DeleteVex           8. InsertArc               ║\n");
-        printf("    ║     9. DeleteArc           10. DFSTraverse            ║\n");
-        printf("    ║     11. BFSTraverse        12. VerticesSetLessThanK   ║\n");
-        printf("    ║     13. ShortestPathLength 14. ConnectedComponentsNums║\n");
-        printf("    ║     15. SaveGraph          16. LoadGraph              ║\n");
-        printf("    ║     17. sortList           18. RemoveList             ║\n");
-        printf("    ║     19. ChangeList         20. AddList                ║\n");
-        printf("    ║     21. LocateList         0. Exit                    ║\n");
+        printf("    ║   1. CreateGraph             2. DestroyGraph          ║\n");
+        printf("    ║   3. LocateVex               4. PutVex                ║\n");
+        printf("    ║   5. FirstAdjVex             6. NextAdjVex            ║\n");
+        printf("    ║   7. InsertVex               8. DeleteVex             ║\n");
+        printf("    ║   9. InsertArc               10.DeleteArc             ║\n");
+        printf("    ║   11.DFSTraverse             12.BFSTraverse           ║\n");
+        printf("    ║   13.VerticesSetLessThanK    14.ShortestPathLength    ║\n");
+        printf("    ║   15.ConnectedComponentsNums 16.LoadGraph             ║\n");
+        printf("    ║   17.SaveGraph               18.AddGraph              ║\n");
+        printf("    ║   19.RemoveGraph             20.ChangeGraph           ║\n");
+        printf("    ║   21.LocateGraph             0. Exit                  ║\n");
         printf("    ╚═══════════════════════════════════════════════════════╝\n");
         printf("    请选择你的操作[0~20]:");
         scanf_s("%d", &op);
         switch (op) {
             case 1:
-                printf("请输入顶点数目:\n");
-                scanf("%d",&tmp);
-                V=(VertexType*) malloc(sizeof(VertexType)*(tmp+1));
-                V[tmp].key=-1;
-                for (int i = 0; i < tmp; ++i) {
-                    scanf("%d %s",&V[i].key,V[i].others);
-                }
-                printf("请输入边的数目:\n");
-                scanf("%d",&tmp);
-                A[tmp][0]=-1;
-                for (int i = 0; i < tmp; ++i) {
-                    scanf("%d %d %d",A[i],A[i]+1,A[i]+2);
-                }
+                printf("请输入顶点序列(key others):\n");
+                tmp=-1;
+                do{
+                    tmp++;
+                    scanf("%d %s",&V[tmp].key,V[tmp].others);
+                } while (V[tmp].key!=-1);
+                printf("请输入边序列(v_key w_key len):\n");
+                tmp=-1;
+                do {
+                    tmp++;
+                    scanf("%d %d %d",A[tmp],A[tmp]+1,A[tmp]+2);
+                } while (A[tmp][0]!=-1);
                 switch (CreateGraph(Graphs.elem[usingGraph].G,V,A)) {
                     case ERROR:
                         printf("创建失败！\n");
@@ -157,108 +168,335 @@ int main() {
                     case OK:
                         printf("销毁成功！\n");
                         break;
-                    case INFEASIBLE:
-                        printf("无向网不存在！\n");
+                    case EMPTY:
+                        printf("无向网未创建！\n");
                         break;
                 }
                 getchar();
                 getchar();
                 break;
             case 3:
-                printf("")
-                switch (LocateVex()) {
-
+                printf("请输入目标顶点的关键字:\n");
+                scanf("%d",&k);
+                switch (tmp=LocateVex(Graphs.elem[usingGraph].G,k)) {
+                    case -1:
+                        printf("目标顶点不存在！\n");
+                        break;
+                    case EMPTY:
+                        printf("无向网未创建！\n");
+                        break;
+                    default:
+                        v = Graphs.elem[usingGraph].G.vertices[tmp].data;
+                        printf("找到第%d个顶点【%d %s】\n",tmp,v.key,v.others);
+                        break;
                 }
                 getchar();
                 getchar();
                 break;
             case 4:
-
+                printf("请输入要修改顶点的关键字:\n");
+                scanf("%d",&k);
+                printf("请输入目标【k v】值:\n");
+                scanf("%d %s",&v.key,v.others);
+                switch(PutVex(Graphs.elem[usingGraph].G,k,v)){
+                    case OK:
+                        printf("修改成功，当前值【%d %s】！\n",v.key,v.others);
+                        break;
+                    case EMPTY:
+                        printf("无向网未创建！\n");
+                        break;
+                    case ERROR:
+                        printf("目标顶点不存在！\n");
+                        break;
+                    case INFEASIBLE:
+                        printf("关键字重复！\n");
+                        break;
+                }
                 getchar();
                 getchar();
                 break;
             case 5:
-
+                printf("请输入顶点的关键字:\n");
+                scanf("%d",&k);
+                switch (tmp=FirstAdjVex(Graphs.elem[usingGraph].G, k)) {
+                    case -1:
+                        printf("该顶点不存在！\n");
+                        break;
+                    case -2:
+                        printf("该顶点无邻接顶点！\n");
+                        break;
+                    case EMPTY:
+                        printf("无向网未创建！\n");
+                        break;
+                    default:
+                        v = Graphs.elem[usingGraph].G.vertices[tmp].data;
+                        printf("该顶点的首个邻接顶点为【%d %s】\n",v.key,v.others);
+                        break;
+                }
                 getchar();
                 getchar();
                 break;
             case 6:
-
+                printf("请输入顶点关键字:\n");
+                scanf("%d",&k);
+                printf("请输入邻接顶点关键字:\n");
+                scanf("%d",&j);
+                switch(tmp=NextAdjVex(Graphs.elem[usingGraph].G,k,j)){
+                    case -1:
+                        printf("目标顶点不存在！\n");
+                        break;
+                    case -2:
+                        printf("目标顶点不存在该邻接顶点！\n");
+                        break;
+                    case -3:
+                        printf("该临界顶点无后续顶点！\n");
+                        break;
+                    case EMPTY:
+                        printf("无向网未创建！\n");
+                        break;
+                    default:
+                        v = Graphs.elem[usingGraph].G.vertices[tmp].data;
+                        printf("后续临界顶点为【%d %s】\n",v.key,v.others);
+                        break;
+                }
                 getchar();
                 getchar();
                 break;
             case 7:
-
+                printf("请输入要插入的顶点:\n");
+                scanf("%d %s",&v.key,v.others);
+                switch (InsertVex(Graphs.elem[usingGraph].G,v)) {
+                    case ERROR:
+                        printf("关键字已存在！\n");
+                        break;
+                    case OVERFLOW:
+                        printf("顶点数过多！\n");
+                        break;
+                    case OK:
+                        printf("顶点【%d %s】插入成功！\n",v.key,v.others);
+                        break;
+                }
                 getchar();
                 getchar();
                 break;
             case 8:
-
+                printf("请输入要删除的顶点关键字:\n");
+                scanf("%d",&k);
+                switch (DeleteVex(Graphs.elem[usingGraph].G, k)) {
+                    case INFEASIBLE:
+                        printf("顶点数过少！\n");
+                        break;
+                    case EMPTY:
+                        printf("无向网未创建！\n");
+                        break;
+                    case ERROR:
+                        printf("未找到目标顶点！\n");
+                        break;
+                    case OK:
+                        printf("定点删除成功！\n");
+                        break;
+                }
                 getchar();
                 getchar();
                 break;
             case 9:
-
+                printf("请输入要增加的边(v_Key w_Key len):\n");
+                scanf("%d %d %d",&j,&k,&tmp);
+                switch (InsertArc(Graphs.elem[usingGraph].G, j, k, tmp)) {
+                    case ERROR:
+                        printf("端点不存在！\n");
+                        break;
+                    case OVERFLOW:
+                        printf("内存分配失败！\n");
+                        break;
+                    case EMPTY:
+                        printf("无向网未创建！\n");
+                        break;
+                    case INFEASIBLE:
+                        if(j==k)printf("不能有自回路！\n");
+                        else printf("%d,%d间已有边！\n",j,k);
+                        break;
+                    case OK:
+                        printf("边插入成功！\n");
+                        break;
+                }
                 getchar();
                 getchar();
                 break;
             case 10:
-
+                printf("请输入要删除边的端点关键字:\n");
+                scanf("%d %d",&j,&k);
+                switch (DeleteArc(Graphs.elem[usingGraph].G, j, k)) {
+                    case ERROR:
+                        printf("未找到该边！\n");
+                        break;
+                    case OK:
+                        printf("删除成功！\n");
+                        break;
+                    case EMPTY:
+                        printf("无向网未创建！\n");
+                        break;
+                }
                 getchar();
                 getchar();
                 break;
             case 11:
+                if(DFSTraverse(Graphs.elem[usingGraph].G,output)==OK){
+                    printf("深度优先遍历成功！\n");
+                } else{
+                    printf("无向网未创建！\n");
+                }
 
                 getchar();
                 getchar();
                 break;
             case 12:
-
+                if(BFSTraverse(Graphs.elem[usingGraph].G,output)==OK)
+                    printf("广度优先遍历成功！\n");
+                else
+                    printf("无向网未创建！\n");
                 getchar();
                 getchar();
                 break;
             case 13:
-
+                printf("请输入起点关键字:\n");
+                scanf("%d",&k);
+                printf("请输入K值:\n");
+                scanf("%d",&tmp);
+                switch (VerticesSetLessThanK(Graphs.elem[usingGraph].G, k, tmp)) {
+                    case OK:
+                        printf("\n查找成功！\n");
+                        break;
+                    case ERROR:
+                        printf("起点不存在！\n");
+                        break;
+                    case EMPTY:
+                        printf("无向网未创建！\n");
+                        break;
+                }
                 getchar();
                 getchar();
                 break;
             case 14:
-
+                printf("请输入起点、终点关键字:\n");
+                scanf("%d %d",&j,&k);
+                switch((tmp=ShortestPathLength(Graphs.elem[usingGraph].G,j,k))) {
+                    case INT_MAX:
+                        printf("两顶点不相邻！\n");
+                        break;
+                    case ERROR:
+                        printf("起点或终点不存在！\n");
+                        break;
+                    case EMPTY:
+                        printf("无向网未创建！\n");
+                        break;
+                    default:
+                        printf("最短路径长度为%d。\n",tmp);
+                }
                 getchar();
                 getchar();
                 break;
             case 15:
-
+                if((tmp=ConnectedComponentsNums(Graphs.elem[usingGraph].G))==EMPTY)
+                    printf("无向网未创建！\n");
+                else
+                    printf("连通分量数为%d。\n", tmp);
                 getchar();
                 getchar();
                 break;
             case 16:
-
+                printf("请输入文件路径:\n");
+                scanf("%s",filename);
+                switch (LoadGraph(Graphs.elem[usingGraph].G,filename)) {
+                    case OK:
+                        printf("加载成功！\n");
+                        break;
+                    case INFEASIBLE:
+                        printf("当前图未销毁！\n");
+                        break;
+                    case OVERFLOW:
+                        printf("内存分配失败！\n");
+                        break;
+                    case ERROR:
+                        printf("文件打开失败！\n");
+                        break;
+                }
                 getchar();
                 getchar();
                 break;
             case 17:
-
+                printf("请输入文件路径:\n");
+                scanf("%s",filename);
+                switch (SaveGraph(Graphs.elem[usingGraph].G,filename)) {
+                    case OK:
+                        printf("保存成功！\n");
+                        break;
+                    case ERROR:
+                        printf("文件打开失败！\n");
+                        break;
+                    case EMPTY:
+                        printf("无向网未创建！\n");
+                        break;
+                }
                 getchar();
                 getchar();
                 break;
             case 18:
-
+                printf("请输入无向网的名称:\n");
+                scanf("%s",s);
+                switch (AddGraph(Graphs,s)) {
+                    case ERROR:
+                        printf("名称已存在！\n");
+                        break;
+                    case OVERFLOW:
+                        printf("无向网过多！\n");
+                        break;
+                    case OK:
+                        printf("无向网添加成功！\n");
+                        break;
+                }
                 getchar();
                 getchar();
                 break;
             case 19:
-
+                printf("请输入要删除的无向网的名称:\n");
+                scanf_s("%s", s);
+                switch (RemoveGraph(Graphs, s) ) {
+                    case ERROR:
+                        printf("无向网不存在！\n");
+                        break;
+                    case INFEASIBLE:
+                        printf("不能删除当前无向网！\n");
+                        break;
+                    case OK:
+                        printf("删除成功！\n");
+                        break;
+                }
                 getchar();
                 getchar();
                 break;
             case 20:
-
+                printf("请输入要使用的无向网的名称:\n");
+                scanf_s("%s", s);
+                tmp = LocateGraph(Graphs, s);
+                if (tmp) {
+                    usingGraph = tmp - 1;
+                    printf("切换无向网成功！\n当前无向网:%d-%s\n", usingGraph, Graphs.elem[usingGraph].name);
+                } else {
+                    printf("无向网不存在！\n");
+                }
                 getchar();
                 getchar();
                 break;
             case 21:
-
+                printf("请输入无向网的名称:\n");
+                scanf_s("%s", s);
+                tmp = LocateGraph(Graphs, s);
+                if (!tmp) {
+                    printf("%s无向网不存在！\n", s);
+                } else {
+                    printf("%s是第%d个无向网。\n", s, tmp - 1);
+                }
                 getchar();
                 getchar();
                 break;
@@ -319,7 +557,7 @@ status CreateGraph(ALGraph &G, VertexType V[], KeyType VR[][3]) {
 }
 
 status DestroyGraph(ALGraph &G) {
-    if (!G.vexnum)return INFEASIBLE;
+    if (!G.vexnum)return EMPTY;
     for (int i = 0; i < G.vexnum; i++) {
         auto p = G.vertices[i].firstarc, q = p;
         while (p) {
@@ -333,6 +571,7 @@ status DestroyGraph(ALGraph &G) {
 }
 
 int LocateVex(ALGraph G, KeyType u) {
+    if (!G.vexnum)return EMPTY;
     int ind = -1;
     for (int i = 0; i < G.vexnum; i++) {
         if (G.vertices[i].data.key == u) {
@@ -344,9 +583,10 @@ int LocateVex(ALGraph G, KeyType u) {
 }
 
 status PutVex(ALGraph &G, KeyType u, VertexType value) {
+    if (!G.vexnum)return EMPTY;
     int ind = -1;
     for (int i = 0; i < G.vexnum; i++) {
-        if (value.key != u && G.vertices[i].data.key == value.key)return ERROR;
+        if (value.key != u && G.vertices[i].data.key == value.key)return INFEASIBLE;
         if (G.vertices[i].data.key == u)ind = i;
     }
     if (ind == -1)return ERROR;
@@ -355,8 +595,12 @@ status PutVex(ALGraph &G, KeyType u, VertexType value) {
 }
 
 int FirstAdjVex(ALGraph G, KeyType u) {
+    if (!G.vexnum)return EMPTY;
     for (int i = 0; i < G.vexnum; i++) {
         if (G.vertices[i].data.key == u) {
+            if(G.vertices[i].firstarc== nullptr){
+                return -2;
+            }
             return G.vertices[i].firstarc->adjvex;
         }
     }
@@ -364,21 +608,25 @@ int FirstAdjVex(ALGraph G, KeyType u) {
 }
 
 int NextAdjVex(ALGraph G, KeyType v, KeyType w) {
+    if (!G.vexnum)return EMPTY;
     for (int i = 0; i < G.vexnum; i++) {
         if (G.vertices[i].data.key == v) {
             auto p = G.vertices[i].firstarc;
-            while (p->nextarc) {
-                if (G.vertices[p->adjvex].data.key == w)return p->nextarc->adjvex;
+            while (p) {
+                if (G.vertices[p->adjvex].data.key == w){
+                    if(p->nextarc==nullptr)return -3;
+                    return p->nextarc->adjvex;
+                    }
                 p = p->nextarc;
             }
-            break;
+            return -2;
         }
     }
     return -1;
 }
 
 status InsertVex(ALGraph &G, VertexType v) {
-    if (G.vexnum == MAX_VERTEX_NUM)return ERROR;
+    if (G.vexnum == MAX_VERTEX_NUM)return OVERFLOW;
     for (int i = 0; i < G.vexnum; i++) {
         if (G.vertices[i].data.key == v.key)return ERROR;
     }
@@ -387,8 +635,9 @@ status InsertVex(ALGraph &G, VertexType v) {
 }
 
 status DeleteVex(ALGraph &G, KeyType v){
+    if (!G.vexnum)return EMPTY;
     int tmp = 2 * G.arcnum;
-    if (G.vexnum == 1)return ERROR;
+    if (G.vexnum == 1)return INFEASIBLE;
     for (int i = 0; i < G.vexnum; i++) {
         if (G.vertices[i].data.key == v) {// 找到顶点 v
             auto p = G.vertices[i].firstarc, o = p;
@@ -431,9 +680,9 @@ status DeleteVex(ALGraph &G, KeyType v){
     }
     return ERROR;
 }
-status InsertArc(ALGraph &G,KeyType v,KeyType w,int len)
-//在图G中增加弧<v,w>，成功返回OK,否则返回ERROR
-{
+status InsertArc(ALGraph &G,KeyType v,KeyType w,int len){
+    if (!G.vexnum)return EMPTY;
+    if(v==w)return INFEASIBLE;
     int iw=-1;
     // 查找 v 顶点
     for (int i = 0; i < G.vexnum; i++) {
@@ -448,16 +697,16 @@ status InsertArc(ALGraph &G,KeyType v,KeyType w,int len)
             }
             ArcNode *p=G.vertices[i].firstarc,*NewArc;
             while (p){
-                if(p->adjvex==iw)return ERROR;// 有边，返回ERROR
+                if(p->adjvex==iw)return INFEASIBLE;// 有边，返回ERROR
                 p=p->nextarc;
             }
             // 插入单向边
-            NewArc=(ArcNode*)malloc(sizeof(ArcNode));
+            if((NewArc=(ArcNode*)malloc(sizeof(ArcNode)))==nullptr)return OVERFLOW;
             NewArc->adjvex=iw;
             NewArc->len=len;
             NewArc->nextarc=G.vertices[i].firstarc;
             G.vertices[i].firstarc=NewArc;
-            NewArc=(ArcNode*)malloc(sizeof(ArcNode));
+            if((NewArc=(ArcNode*)malloc(sizeof(ArcNode)))==nullptr)return OVERFLOW;
             NewArc->adjvex=i;
             NewArc->len=len;
             NewArc->nextarc=G.vertices[iw].firstarc;
@@ -469,6 +718,7 @@ status InsertArc(ALGraph &G,KeyType v,KeyType w,int len)
     return ERROR;
 }
 status DeleteArc(ALGraph &G,KeyType v,KeyType w){
+    if (!G.vexnum)return EMPTY;
     int iw=-1;
     for (int i = 0; i < G.vexnum; i++) {
         if(G.vertices[i].data.key==w)iw=i;
@@ -537,9 +787,8 @@ void DFS(ALGraph G,int v,void (*visit)(VertexType)){
         if(!vis[p->adjvex])DFS(G,p->adjvex,visit);
     }
 }
-status DFSTraverse(ALGraph &G,void (*visit)(VertexType))
-//对图G进行深度优先搜索遍历，依次对图中的每一个顶点使用函数visit访问一次，且仅访问一次
-{
+status DFSTraverse(ALGraph &G,void (*visit)(VertexType)){
+    if (!G.vexnum)return EMPTY;
     for (int i = 0; i < G.vexnum; i++) vis[i]=false;
     for (int i = 0; i < G.vexnum; i++) {
         if(!vis[i])DFS(G,i,visit);
@@ -548,6 +797,7 @@ status DFSTraverse(ALGraph &G,void (*visit)(VertexType))
     return OK;
 }
 status BFSTraverse(ALGraph &G,void (*visit)(VertexType)){
+    if (!G.vexnum)return EMPTY;
     int queue[MAX_VERTEX_NUM+1],h=0,t=0;
     for (int i = 0; i < G.vexnum; i++) vis[i]=false;
     for (int i = 0; i < G.vexnum; i++) {
@@ -570,7 +820,9 @@ status BFSTraverse(ALGraph &G,void (*visit)(VertexType)){
     return OK;
 }
 status SaveGraph(ALGraph G, char FileName[]){
+    if (!G.vexnum)return EMPTY;
     FILE *fw= fopen(FileName,"wb");int nil=-1;
+    if(fw==nullptr)return ERROR;
     fwrite(&G.kind,sizeof G.kind,1,fw);
     fwrite(&G.vexnum,sizeof(int),1,fw);
     for (int i = 0; i < G.vexnum; ++i) {
@@ -587,7 +839,9 @@ status SaveGraph(ALGraph G, char FileName[]){
     return OK;
 }
 status LoadGraph(ALGraph &G, char FileName[]){
+    if(G.vexnum)return INFEASIBLE;
     FILE *fr= fopen(FileName,"rb");
+    if(fr==nullptr)return ERROR;
     G.vexnum=G.arcnum=0;
     fread(&G.kind,sizeof(GraphKind),1,fr);
     fread(&G.vexnum,sizeof(int),1,fr);
@@ -595,14 +849,19 @@ status LoadGraph(ALGraph &G, char FileName[]){
         fread(&(G.vertices[i].data), sizeof(VertexType),1,fr);
         G.vertices[i].firstarc= nullptr;
         auto NArc=(ArcNode*)malloc(sizeof(ArcNode));
+        if(NArc==nullptr)return OVERFLOW;
         fread(&(NArc->adjvex), sizeof(int), 1, fr);
         fread(&(NArc->len), sizeof(int), 1, fr);
         NArc->nextarc= nullptr;
-        if(NArc->adjvex == -1)continue;
+        if(NArc->adjvex == -1){
+            free(NArc);
+            continue;
+        }
         G.vertices[i].firstarc=NArc;
         auto head=NArc;
         while (true){
             NArc=(ArcNode*)malloc(sizeof(ArcNode));
+            if(NArc==nullptr)return OVERFLOW;
             fread(&(NArc->adjvex), sizeof(int), 1, fr);
             fread(&(NArc->len), sizeof(int), 1, fr);
             if(NArc->adjvex == -1)break;
@@ -616,26 +875,30 @@ status LoadGraph(ALGraph &G, char FileName[]){
     return OK;
 }
 //（1）距离小于k的顶点集合：函数名称是VerticesSetLessThanK(G,v,k)，初始条件是图G存在；操作结果是返回与顶点v距离小于k的顶点集合；
+void LTK_DFS(ALGraph G,int dis,int V_idx,int k){
+    if(dis>k||vis[V_idx])return;
+    vis[V_idx]=true;
+    printf("【%d %s】",G.vertices[V_idx].data.key,G.vertices[V_idx].data.others);
+    auto p=G.vertices[V_idx].firstarc;
+    while (p){
+        LTK_DFS(G,dis+p->len,p->adjvex,k);
+        p=p->nextarc;
+    }
+}
 status VerticesSetLessThanK(ALGraph G,KeyType v,int k){
-    int n=0;
+    if (!G.vexnum)return EMPTY;
     for (int i = 0; i < G.vexnum; ++i) {
         if(G.vertices[i].data.key==v){
-            auto tmp=G.vertices[i].firstarc;
-            while (tmp){
-                if(tmp->len<k){
-                    n++;
-                    printf("【%d %s】",G.vertices[tmp->adjvex].data.key,G.vertices[tmp->adjvex].data.others);
-                }
-                tmp=tmp->nextarc;
-            }
-            if(n)return OK;
-            return INFEASIBLE;
+            LTK_DFS(G,0,i,k);
+            memset(vis,0, sizeof vis);
+            return OK;
         }
     }
     return ERROR;
 }
 //（2）顶点间最短路径和长度：函数名称是ShortestPathLength(G,v,w); 初始条件是图G存在；操作结果是返回顶点v与顶点w的最短路径的长度；
 int ShortestPathLength(ALGraph G,KeyType v,KeyType w){
+    if (!G.vexnum)return EMPTY;
     int dist[G.vexnum],start=-1,end=-1;
     for (int i = 0; i < G.vexnum; ++i) {
         dist[i]=INT_MAX;
@@ -655,14 +918,57 @@ int ShortestPathLength(ALGraph G,KeyType v,KeyType w){
     return dist[end];
 }
 //（3）图的连通分量：函数名称是ConnectedComponentsNums(G)，初始条件是图G存在；操作结果是返回图G的所有连通分量的个数；
-
+void CC_DFS(ALGraph G,int v){
+    vis[v]=true;
+    for (auto p=G.vertices[v].firstarc; p ; p=p->nextarc) {
+        if(!vis[p->adjvex])CC_DFS(G,p->adjvex);
+    }
+}
 int ConnectedComponentsNums(ALGraph G){
+    if (!G.vexnum)return EMPTY;
     int ans=0;
     for (int i = 0; i < G.vexnum; ++i) {
         if(!vis[i]){
-            DFS(G,i,Emp);
+            CC_DFS(G,i);
             ans++;
         }
     }
+    memset(vis,0, sizeof vis);
     return ans;
+}
+
+int LocateGraph(GRAPHS graphs, const char GraphName[]) {
+    for (int i = 0; i < graphs.length; i++) {
+        if (strcmp(graphs.elem[i].name, GraphName) != 0)continue;
+        return i + 1;
+    }
+    return 0;
+}
+status AddGraph(GRAPHS &graphs,const char GraphName[]){
+    if(graphs.length>=10)return OVERFLOW;
+    if(LocateGraph(graphs,GraphName))return ERROR;
+    int i=0;
+    while ((((graphs.elem)[graphs.length]).name[i] = GraphName[i]))i++;
+    ((graphs.elem)[graphs.length]).G.vexnum = 0;
+    graphs.length++;
+    return OK;
+}
+status RemoveGraph(GRAPHS &graphs, char ListName[]) {
+    int i = LocateGraph(graphs, ListName);
+    if (!i) {
+        return ERROR;
+    }
+    if (i == usingGraph + 1) {
+        return INFEASIBLE;
+    }
+    i--;
+    if (usingGraph >= i)usingGraph--;
+    DestroyGraph(graphs.elem[i].G);
+    for (; i < graphs.length; i++) {
+        graphs.elem[i] = graphs.elem[i + 1];
+    }
+    graphs.elem[i].G.vexnum=0;
+    graphs.length--;
+    return OK;
+
 }
