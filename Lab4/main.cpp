@@ -128,7 +128,7 @@ int main() {
         printf("    ║   19.RemoveGraph             20.ChangeGraph           ║\n");
         printf("    ║   21.LocateGraph             0. Exit                  ║\n");
         printf("    ╚═══════════════════════════════════════════════════════╝\n");
-        printf("    请选择你的操作[0~20]:");
+        printf("    请选择你的操作:");
         scanf_s("%d", &op);
         switch (op) {
             case 1:
@@ -382,7 +382,7 @@ int main() {
                 scanf("%d %d",&j,&k);
                 switch((tmp=ShortestPathLength(Graphs.elem[usingGraph].G,j,k))) {
                     case INT_MAX:
-                        printf("两顶点不相邻！\n");
+                        printf("两顶点不连通！\n");
                         break;
                     case ERROR:
                         printf("起点或终点不存在！\n");
@@ -871,6 +871,7 @@ status LoadGraph(ALGraph &G, char FileName[]){
             G.arcnum++;
         }
     }
+    G.arcnum/=2;
     fclose(fr);
     return OK;
 }
@@ -878,7 +879,7 @@ status LoadGraph(ALGraph &G, char FileName[]){
 void LTK_DFS(ALGraph G,int dis,int V_idx,int k){
     if(dis>k||vis[V_idx])return;
     vis[V_idx]=true;
-    printf("【%d %s】",G.vertices[V_idx].data.key,G.vertices[V_idx].data.others);
+    if(dis)printf("【%d %s】",G.vertices[V_idx].data.key,G.vertices[V_idx].data.others);
     auto p=G.vertices[V_idx].firstarc;
     while (p){
         LTK_DFS(G,dis+p->len,p->adjvex,k);
@@ -908,11 +909,13 @@ int ShortestPathLength(ALGraph G,KeyType v,KeyType w){
     }
     if(start==-1||end==-1)return ERROR;
     dist[start]=0;
-    for (int i = 1; i < G.vexnum; i++) {
-        ArcNode *tmp=G.vertices[i].firstarc;
-        while (tmp){
-            dist[tmp->adjvex]=min(tmp->len+dist[i],dist[tmp->adjvex]);
-            tmp=tmp->nextarc;
+    for(int j=0;j<G.vexnum;j++) {
+        for (int i = 0; i < G.vexnum; i++) {
+            ArcNode *tmp = G.vertices[i].firstarc;
+            while (tmp) {
+                dist[tmp->adjvex] = min(tmp->len+dist[i], dist[tmp->adjvex]);
+                tmp = tmp->nextarc;
+            }
         }
     }
     return dist[end];

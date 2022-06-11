@@ -109,7 +109,7 @@ int main() {
         printf("    ¨U      21. ChangeBiTree         22. LocateBiTree       ¨U\n");
         printf("    ¨U                        0. Exit                       ¨U\n");
         printf("    ¨^¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨T¨a\n");
-        printf("    ÇëÑ¡ÔñÄãµÄ²Ù×÷[0~20]:");
+        printf("    ÇëÑ¡ÔñÄãµÄ²Ù×÷:");
         scanf("%d", &op);
         switch (op) {
             case 1:
@@ -458,7 +458,7 @@ status CreateBiTree(BiTree &T, TElemType definition[]) {
         }
         flag=CreateBiTree(T->rchild, definition);
         if (flag == ERROR||flag==OVERFLOW){
-            free(T);
+            ClearBiTree(T);
             T=nullptr;
             return flag;
         }
@@ -492,15 +492,15 @@ BiTNode *LocateNode(BiTree T, KeyType e) {
 
 status Assign(BiTree &T, KeyType e, TElemType value) {
     BiTNode *tmp1 = LocateNode(T, e), *tmp2 = nullptr;
-    if (value.key != e)tmp2 = LocateNode(T, value.key);
     if (!tmp1)return INFEASIBLE;
+    if (value.key != e)tmp2 = LocateNode(T, value.key);
     if(tmp2)return ERROR;
     tmp1->data = value;
     return OK;
 }
 
 BiTNode *GetSibling(BiTree T, KeyType e) {
-    if(T->data.key==e||(!T->lchild) && (!T->rchild))return nullptr;
+    if((!T)||(!T->lchild) && (!T->rchild))return nullptr;
     BiTNode *tmp;
     if (T->lchild && T->lchild->data.key == e)return T->rchild;
     if (T->rchild && T->rchild->data.key == e)return T->lchild;
@@ -514,7 +514,6 @@ status InsertNode(BiTree &T, KeyType e, int LR, TElemType c){
     if (LocateNode(T, c.key))return INFEASIBLE;
     auto *tmp = (BiTNode *) malloc(sizeof(BiTNode));
     tmp->data = c;
-    int status = ERROR;
     if (T->data.key == e || LR == -1) {
         switch (LR) {
             case -1:
@@ -533,21 +532,22 @@ status InsertNode(BiTree &T, KeyType e, int LR, TElemType c){
                 T->rchild = tmp;
                 break;
         }
-        status = OK;
+        return OK;
     } else {
+        int st = 0;
         if (T->lchild) {
-            status |= InsertNode(T->lchild, e, LR, c);
+            if(InsertNode(T->lchild, e, LR, c)==OK)st++;
         }
         if (T->rchild) {
-            status |= InsertNode(T->rchild, e, LR, c);
+            if(InsertNode(T->rchild, e, LR, c)==OK)st++;
         }
+        return st==0?ERROR:OK;
     }
-    return status;
 }
 
 status DeleteNode(BiTree &T, KeyType e) {
+    if (!T)return ERROR;
     BiTNode *tmp, *p;
-    int status = ERROR;
     if (T->data.key == e) {
         tmp = T;
         if (T->lchild) { // ×ó×ÓÊ÷²»Îª¿Õ
@@ -555,22 +555,23 @@ status DeleteNode(BiTree &T, KeyType e) {
             while (p->rchild)p = p->rchild;
             p->rchild = T->rchild;
             T = T->lchild;
-        } else if (T->rchild) { //×ó×ÓÊ÷Îª¿Õ
+        } else if (T->rchild) { //×ó×ÓÊ÷Îª¿Õ£¬ÓÒ×ÓÊ÷²»¿Õ
             T = T->rchild;
-        } else {
+        } else { //×óÓÒ×ÓÊ÷½Ô¿Õ
             T = nullptr;
         }
         free(tmp);
-        status = OK;
+        return OK;
     } else {
+        int st = 0;
         if (T->lchild) {
-            status |= DeleteNode(T->lchild, e);
+            if(DeleteNode(T->lchild, e)==OK)st++ ;
         }
         if (T->rchild) {
-            status |= DeleteNode(T->rchild, e);
+            if(DeleteNode(T->rchild, e)==OK)st++;
         }
+        return st==0?ERROR:OK;
     }
-    return status;
 }
 
 status PreOrderTraverse(BiTree T, void (*visit)(BiTree)){

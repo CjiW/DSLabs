@@ -37,57 +37,123 @@ typedef struct {  //线性表的集合类型定义
 } LISTS;
 LISTS Lists;      //线性表集合的定义Lists
 int usingList = 0;
-
+// 功能：顺序表不存在：初始化表，返回OK；
+//      顺序表已存在，返回INFEASIBLE。
+// 参数：顺序表的引用 SqList &L
+// 返回：【OK|OVERFLOW|INFEASIBLE】
 status InitList(SqList &L);
-
+// 功能：顺序表存在：销毁表，释放空间，返回 OK；
+//      顺序表不存在，返回 INFEASIBLE。
+// 参数：顺序表的引用 SqList &L
+// 返回：【OK|INFEASIBLE】
 status DestroyList(SqList &L);
-
+// 功能：顺序表存在：清空表，返回 OK；
+//      顺序表不存在，返回 INFEASIBLE。
+// 参数：顺序表的引用 SqList &L
+// 返回：【OK|INFEASIBLE】
 status ClearList(SqList &L);
-
+// 功能：顺序表存在：判断线性表是否为空，返回【TRUE|FALSE】；
+//      顺序表不存在，返回 INFEASIBLE。
+// 参数：顺序表 SqList L
+// 返回：【TRUE|FALSE|INFEASIBLE】
 status ListEmpty(SqList L);
-
+// 功能：顺序表存在：返回表长；
+//      顺序表不存在，返回 INFEASIBLE。
+// 参数：顺序表 SqList L
+// 返回：【表长|INFEASIBLE】
 int ListLength(SqList L);
-
+// 功能：顺序表存在：查找指定位置的元素，返回OK；
+//      顺序表不存在，返回 INFEASIBLE。
+// 参数：顺序表 SqList L，位序 int i，元素引用 ElemType &e
+// 返回：【OK|ERROR|INFEASIBLE】
 status GetElem(SqList L, int i, ElemType &e);
-
-int LocateElem(SqList L, ElemType e); //简化过
-
+// 功能：顺序表存在：查找指定元素，找到返回位序，未找到则返回ERROR；
+//      顺序表不存在，返回 INFEASIBLE。
+// 参数：顺序表 SqList L，指定元素 ElemType e
+// 返回：【位序|ERROR|INFEASIBLE】
+int LocateElem(SqList L, ElemType e);
+// 功能：顺序表存在：查找指定元素的前驱，找到返回OK，未找到则返回ERROR。
+//      顺序表不存在，返回 INFEASIBLE。
+// 参数：顺序表 SqList L，当前元素 ElemType cur，前驱元素的引用 ElemType &pre_e
+// 返回：【OK|ERROR|INFEASIBLE】
 status PriorElem(SqList L, ElemType cur, ElemType &pre_e);
-
+// 功能：顺序表存在：查找指定元素的后继，找到返回OK，未找到则返回ERROR；
+//      顺序表不存在，返回 INFEASIBLE。
+// 参数：顺序表 SqList L，当前元素 ElemType cur，后继元素的引用 ElemType &next_e
+// 返回：【OK|ERROR|INFEASIBLE】
 status NextElem(SqList L, ElemType cur, ElemType &next_e);
-
+// 功能：顺序表存在：在指定位序前插入指定元素，成功返回OK，失败返回ERROR；内存分配失败，返回OVERFLOW。
+//      顺序表不存在，返回 INFEASIBLE。
+// 参数：顺序表引用 SqList &L，位序 int i，元素 ElemType e
+// 返回：【OK|OVERFLOW|ERROR|INFEASIBLE】
 status ListInsert(SqList &L, int i, ElemType e);
-
+// 功能：顺序表存在：删除指定位置的元素，并将其值通过引用传回，成功返回OK，失败返回ERROR；
+//      顺序表不存在，返回 INFEASIBLE。
+// 参数：顺序表引用 SqList &L，位序 int i，元素引用 ElemType &e
+// 返回：【OK|ERROR|INFEASIBLE】
 status ListDelete(SqList &L, int i, ElemType &e);
-
+// 功能：顺序表存在：遍历顺序表并输出元素值，返回OK；
+//      顺序表不存在，返回 INFEASIBLE。
+// 参数：顺序表 SqList L
+// 返回：【OK|INFEASIBLE】
 status ListTraverse(SqList L);
-
+// 功能：顺序表存在：保存表数据到指定文件，成功返回OK，失败返回ERROR；
+//      顺序表不存在，返回 INFEASIBLE。
+// 参数：顺序表 SqList L，文件路径 char FileName[]
+// 返回：【OK|ERROR|INFEASIBLE】
 status SaveList(SqList L, char FileName[]);
-
+// 功能：顺序表不存在：从指定文件加载表数据，成功返回OK，失败返回ERROR|OVERFLOW；
+//      顺序表已存在，返回 INFEASIBLE。
+// 参数：顺序表的引用 SqList &L，文件路径 char FileName[]
+// 返回：【OK|OVERFLOW|ERROR|INFEASIBLE】
 status LoadList(SqList &L, char FileName[]);
-
+// 功能：顺序表存在：返回最大子数组和；
+//      顺序表不存在，返回 INFEASIBLE。
+// 参数：顺序表 SqList L
+// 返回：【子数组和|INFEASIBLE】
 int MaxSubArray(SqList L);
-
+// 功能：顺序表存在：返回和为k的子数组的数目；
+//      顺序表不存在，返回 INFEASIBLE。
+// 参数：顺序表 SqList L 整数 int k
+// 返回：【和为k的子数组数目|INFEASIBLE】
 int SubArrayNum(SqList L, ElemType k);
-
+// 功能：顺序表存在：将顺序表按升序排序，返回OK；
+//      顺序表不存在，返回 INFEASIBLE。
+// 参数：顺序表 SqList L
+// 返回：【OK|ERROR|INFEASIBLE】
 status sortList(SqList L);
-
+// 辅助函数
 ElemType min(ElemType a, ElemType b);
-
-ElemType max(ElemType a, ElemType b);
-
+// 辅助函数
 int hash(int key, int numsSize);
-
+// 辅助函数
 int containKey(HashNode *hashtable, int key, int numsSize);
-
+// 辅助函数
 int getKey(HashNode *hashtable, int key, int numsSize);
-
+// 辅助函数
 void push(HashNode *hashtable, int key, int numsSize);
 
+// 功能：向顺序表序列尾部添加一个顺序表并返回OK；
+//      若顺序表已存在，返回ERROR；
+//      若顺序表列表已满，返回OVERFLOW。
+// 参数：顺序表序列引用 LISTS &Lists，表名 char ListName[]
+// 返回：【OK|ERROR|OVERFLOW】
 status AddList(LISTS &lists, const char ListName[]);
-
+// 功能：改变usingList的值，从而改变当前表，返回OK，
+//      若表不存在，返回ERROR。
+// 参数：顺序表序列 LISTS Lists，表名 char ListName[]
+// 返回：【OK|ERROR】
+status ChangeList(LISTS lists, const char ListName[]);
+// 功能：从顺序表序列中删除指定表名的顺序表，返回OK；
+//      若顺序表不存在，返回ERROR；
+//      若该顺序表正在使用，返回INFEASIBLE。
+// 参数：顺序表序列引用 LISTS \&Lists，表名 char ListName[]
+// 返回：【OK|ERROR|INFEASIBLE】
 status RemoveList(LISTS &lists, char ListName[]);
-
+// 功能：查找指定表名的顺序表，查找成功，返回位序（i>=1）；
+//      查找失败，返回0
+// 参数：顺序表序列 LISTS Lists，表名 char ListName[]
+// 返回：【0|位序】
 int LocateList(LISTS lists, const char ListName[]);
 
 /*--------------------------------------------*/
@@ -119,7 +185,7 @@ int main() {
         printf("    ║     19. ChangeList        20. AddList          ║\n");
         printf("    ║     21. LocateList        0. Exit              ║\n");
         printf("    ╚════════════════════════════════════════════════╝\n");
-        printf("    请选择你的操作[0~20]:");
+        printf("    请选择你的操作:");
         scanf_s("%d", &op);
         switch (op) {
             case 1:
@@ -348,23 +414,40 @@ int main() {
                 break;
             case 15:
                 tmp = MaxSubArray(Lists.elem[usingList].L);
-                printf("最大子数组和为%d。\n", tmp);
+                if(tmp==INFEASIBLE)printf("线性表未初始化！");
+                else printf("最大子数组和为%d。\n", tmp);
                 getchar();
                 getchar();
                 break;
             case 16:
                 printf("请输入子数组和:\n");
                 scanf_s("%d", &e);
-                tmp = SubArrayNum(Lists.elem[usingList].L, e);
-                printf("和为%d的子数组数为%d。\n", e, tmp);
+                switch(tmp = SubArrayNum(Lists.elem[usingList].L, e)){
+                    case INFEASIBLE:
+                        printf("线性表未初始化！\n", e, tmp);
+                        break;
+                    case ERROR:
+                        printf("线性表为空表！\n", e, tmp);
+                        break;
+                    default:
+                        printf("和为%d的子数组数为%d。\n", e, tmp);
+                        break;
+                }
+
                 getchar();
                 getchar();
                 break;
             case 17:
-                if (sortList(Lists.elem[usingList].L) == OK) {
-                    printf("排序成功！\n");
-                } else {
-                    printf("排序失败！\n");
+                switch (sortList(Lists.elem[usingList].L)) {
+                    case ERROR:
+                        printf("排序失败！\n");
+                        break;
+                    case INFEASIBLE:
+                        printf("线性表未初始化！\n");
+                        break;
+                    case OK:
+                        printf("排序成功！\n");
+                        break;
                 }
                 getchar();
                 getchar();
@@ -372,17 +455,24 @@ int main() {
             case 18:
                 printf("请输入要删除的表名:\n");
                 scanf_s("%s", s);
-                if (RemoveList(Lists, s) == ERROR)printf("删除失败！\n");
-                else printf("删除成功！\n");
+                switch(RemoveList(Lists, s)){
+                    case ERROR:
+                        printf("顺序表不存在！\n");
+                        break;
+                    case INFEASIBLE:
+                        printf("不能删除当前表！\n");
+                        break;
+                    case OK:
+                        printf("删除成功！\n");
+                        break;
+                }
                 getchar();
                 getchar();
                 break;
             case 19:
                 printf("请输入要使用的表名:\n");
                 scanf_s("%s", s);
-                tmp = LocateList(Lists, s);
-                if (tmp) {
-                    usingList = tmp - 1;
+                if (ChangeList(Lists,s)==OK) {
                     printf("改变使用表成功！\n当前表:%d-%s\n", usingList, Lists.elem[usingList].name);
                 } else {
                     printf("表不存在！\n");
@@ -574,21 +664,27 @@ status LoadList(SqList &L, char FileName[]) {
         while (s == OK && fread(&tmp, sizeof(ElemType), 1, pRead))
             s = ListInsert(L, L.length + 1, tmp);
         fclose(pRead);
+        if(s!=OK)DestroyList(L);
         return s;
-    } else return ERROR;
+    } else {
+        DestroyList(L);
+        return ERROR;
+    }
 }
 
 int MaxSubArray(SqList L) {
     if (!L.elem)return INFEASIBLE;
-    int pre = 0, maxAns = L.elem[0];
+    int now=0,max=0;
     for (int i = 0; i < L.length; i++) {
-        pre = max(pre + L.elem[i], L.elem[i]);
-        maxAns = max(maxAns, pre);
+        now+=L.elem[i];
+        if(now<0)now=0;
+        if(now>max)max=now;
     }
-    return maxAns;
+    return max;
 }
 
 status sortList(SqList L) {
+    if(!L.elem)return INFEASIBLE;
     ElemType *a = L.elem;
     auto *b = (ElemType *) malloc(L.length * sizeof(ElemType));
     if (!b)return ERROR;
@@ -623,11 +719,6 @@ status sortList(SqList L) {
 ElemType min(ElemType a, ElemType b) {
     return a > b ? b : a;
 }
-
-ElemType max(ElemType a, ElemType b) {
-    return a < b ? b : a;
-}
-
 
 int hash(int key, int numsSize) {
     return key & (numsSize - 1);
@@ -671,6 +762,8 @@ void push(HashNode *hashtable, int key, int numsSize) {
 }
 
 int SubArrayNum(SqList L, int k) {
+    if(!L.elem)return INFEASIBLE;
+    if(!L.length)return ERROR;
     auto *hashtable = (HashNode *) malloc(sizeof(HashNode) * L.length);
     memset(hashtable, 0, sizeof(HashNode) * L.length);
     push(hashtable, 0, L.length);
@@ -694,16 +787,19 @@ status AddList(LISTS &lists, const char ListName[]) {
     return OK;
 }
 
+status ChangeList(LISTS lists, const char ListName[]){
+    int tmp=LocateList(lists, ListName);
+    if(tmp){
+        usingList=tmp-1;
+        return OK;
+    }
+    return ERROR;
+}
+
 status RemoveList(LISTS &lists, char ListName[]) {
     int i = LocateList(lists, ListName);
-    if (!i) {
-        printf("该表不存在！\n");
-        return ERROR;
-    }
-    if (i == usingList + 1) {
-        printf("不能删除当前表！\n");
-        return ERROR;
-    }
+    if (!i) return ERROR;
+    if (i == usingList + 1) return INFEASIBLE;
     i--;
     if (usingList >= i)usingList--;
     DestroyList(lists.elem[i].L);

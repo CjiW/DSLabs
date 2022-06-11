@@ -73,7 +73,7 @@ int main(){
         printf("    ║     19. ChangeList        20. LocateList       ║\n");
         printf("    ║     21. RemoveNthFromEnd  0. Exit              ║\n");
         printf("    ╚════════════════════════════════════════════════╝\n");
-        printf("    请选择你的操作[0~20]:");
+        printf("    请选择你的操作:");
         scanf_s("%d",&op);
         switch(op){
             case 1:
